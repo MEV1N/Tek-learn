@@ -1,0 +1,619 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;800&display=swap');
+
+/* Base Reset & Typography */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #000000;
+    color: #ffffff;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Canvas Background */
+#bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Ensure all content sits above the canvas */
+.container,
+section,
+header {
+    position: relative;
+    z-index: 1;
+}
+
+h1,
+h2,
+h3 {
+    font-weight: 600;
+    /* Decreased bold */
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    /* Slight tightening for cleaner look */
+}
+
+p {
+    color: #E0E0E0;
+    /* Changed from pure white to a soft light grey */
+    font-size: 1rem;
+    line-height: 1.7;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: 140px 0 100px;
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-content {
+    max-width: 900px;
+}
+
+.logo {
+    width: 60px;
+    height: auto;
+    position: absolute;
+    top: 40px;
+    left: 40px;
+}
+
+.hero h1 {
+    font-size: clamp(32px, 5vw, 64px);
+    margin-bottom: 24px;
+    letter-spacing: -0.02em;
+}
+
+.hero p {
+    font-size: clamp(18px, 2.5vw, 32px);
+    font-weight: 500;
+    color: #FFFFFF;
+}
+
+/* Who We Are */
+.who-we-are {
+    display: flex;
+    align-items: flex-start;
+    gap: 80px;
+    /* Increased from 60px */
+    padding: 120px 0;
+    /* Increased from 80px */
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.who-we-are-icon {
+    background-color: #292929;
+    padding: 40px;
+    border-radius: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 160px;
+}
+
+.who-we-are h2 {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.who-we-are p {
+    font-size: 24px;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* What We Do */
+.what-we-do {
+    padding: 120px 0;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.what-we-do-header {
+    margin-bottom: 60px;
+}
+
+.what-we-do-header h2 {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #F7F7F7;
+}
+
+.what-we-do-header p {
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.features-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 80px;
+    /* Increased vertical gap */
+}
+
+.feature-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+.feature-item {
+    position: relative;
+    z-index: 1;
+    width: calc(50% - 15px);
+    background-color: #363434;
+    padding: 50px 60px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.feature-item.right {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.feature-icon {
+    width: auto;
+    height: 50px;
+}
+
+/* Brightness matching */
+.top-icon {
+    opacity: 0.6;
+    /* Matches the visual brightness of the bottom ones */
+    filter: brightness(1.2);
+}
+
+.feature-item h3 {
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+/* THE FIX: Clipping the exact angles from the Figma design */
+.item-top-left {
+    clip-path: polygon(0 0, 100% 0, calc(100% - 80px) 100%, 0 100%);
+}
+
+.item-top-right {
+    clip-path: polygon(80px 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.item-bottom-left {
+    clip-path: polygon(0 0, calc(100% - 80px) 0, 100% 100%, 0 100%);
+}
+
+.item-bottom-right {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 80px 100%);
+}
+
+/* Our Approach */
+.approach {
+    text-align: center;
+    padding: 100px 0;
+}
+
+.approach h2 {
+    font-size: 50px;
+    margin-bottom: 20px;
+}
+
+.approach-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    margin: 60px 0;
+    flex-wrap: wrap;
+}
+
+.flow-step {
+    background-color: #D9D9D9;
+    color: #000000;
+    padding: 16px 50px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 32px;
+}
+
+.flow-arrow {
+    width: 60px;
+    height: 2px;
+    background-color: #fff;
+    position: relative;
+}
+
+.flow-arrow::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -5px;
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 10px solid #fff;
+}
+
+.approach p {
+    max-width: 900px;
+    margin: 0 auto;
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+/* Shared Text Sections */
+.text-section {
+    padding: 100px 0;
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.text-section h2 {
+    font-size: 50px;
+    margin-bottom: 24px;
+}
+
+.text-section p.subtitle {
+    font-size: 28px;
+    font-weight: 500;
+    margin-bottom: 40px;
+    line-height: 1.4;
+}
+
+.list-wrapper {
+    display: block;
+    text-align: left;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.exists-sub {
+    font-size: 28px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    color: #FCFCFC;
+}
+
+.text-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.text-section li {
+    margin-bottom: 12px;
+    font-size: 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    color: #FCFCFC;
+}
+
+.text-section li::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background-color: #fff;
+    border-radius: 50%;
+    margin-top: 10px;
+    flex-shrink: 0;
+}
+
+.vision-footer {
+    font-size: 18px;
+    color: #ccc;
+    margin-top: 32px;
+}
+
+.differences-list {
+    font-family: 'Inter', sans-serif;
+}
+
+.differences-list li {
+    font-size: 18px;
+    line-height: 1.8;
+}
+
+.differences-list li::before {
+    content: '✔';
+    background: none;
+    color: #fff;
+    font-size: 20px;
+    margin-top: 0;
+}
+
+/* Our Mission */
+.mission {
+    margin: 100px auto;
+    padding: 60px 40px;
+    background-color: #413F3F;
+    max-width: 900px;
+    text-align: center;
+    border-top: 2px solid #333;
+    border-bottom: 2px solid #333;
+    position: relative;
+}
+
+.mission-icon {
+    width: 50px;
+    margin-bottom: 24px;
+}
+
+.mission-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 24px;
+}
+
+.mission-title h2 {
+    font-family: 'Inter', sans-serif;
+    font-size: 48px;
+    letter-spacing: normal;
+}
+
+.mission h3 {
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    color: #e2e2e2;
+}
+
+/* CTA Section */
+.cta {
+    position: relative;
+    /* important for absolute positioning of group 12 */
+    text-align: center;
+    padding: 100px 0 140px;
+    font-family: 'Inter', sans-serif;
+}
+
+.cta h2 {
+    font-size: 54px;
+    font-weight: 600;
+    /* Decreased bold */
+    margin-bottom: 24px;
+}
+
+.cta p {
+    margin-bottom: 60px;
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+/* Reverted back to the preferred pill button */
+.btn-join {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    background-color: #ffffff;
+    color: #000000;
+    padding: 16px 40px;
+    font-size: 28px;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 40px;
+    /* Pill shape */
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-join:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255, 255, 255, 0.1);
+}
+
+.group-12-decor {
+    position: absolute;
+    right: 40px;
+    bottom: 20px;
+    height: 180px;
+    width: auto;
+    opacity: 0.8;
+    z-index: 0;
+}
+
+/* =========================================
+   MOBILE RESPONSIVENESS
+   ========================================= */
+@media (max-width: 1024px) {
+    .feature-item h3 {
+        font-size: 24px;
+    }
+
+    .who-we-are p {
+        font-size: 20px;
+    }
+
+    .approach p {
+        font-size: 24px;
+    }
+
+    .group-12-decor {
+        right: 20px;
+        height: 140px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 32px;
+    }
+
+    .hero p {
+        font-size: 20px;
+    }
+
+    .who-we-are {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 30px;
+    }
+
+    .who-we-are-icon {
+        padding: 30px;
+        min-width: 120px;
+    }
+
+    .who-we-are h2 {
+        font-size: 36px;
+    }
+
+    .who-we-are p {
+        font-size: 18px;
+        text-align: left;
+    }
+
+    .what-we-do-header h2 {
+        font-size: 36px;
+    }
+
+    .what-we-do-header p {
+        font-size: 18px;
+    }
+
+    .feature-row {
+        flex-direction: column;
+        padding: 0;
+        gap: 20px;
+    }
+
+    .feature-item {
+        width: 100%;
+        padding: 30px 20px;
+        align-items: flex-start;
+        text-align: left;
+        clip-path: none;
+    }
+
+    .feature-item.right {
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .feature-item h3 {
+        font-size: 20px;
+    }
+
+    .approach h2 {
+        font-size: 36px;
+    }
+
+    .approach p {
+        font-size: 18px;
+    }
+
+    .approach-flow {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .flow-step {
+        font-size: 20px;
+        padding: 12px 30px;
+    }
+
+    .flow-arrow {
+        width: 2px;
+        height: 30px;
+    }
+
+    .flow-arrow::after {
+        right: -5px;
+        top: 100%;
+        border-top: 10px solid #fff;
+        border-bottom: none;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+    }
+
+    .text-section h2 {
+        font-size: 36px;
+    }
+
+    .text-section p.subtitle {
+        font-size: 20px;
+    }
+
+    .text-section li {
+        font-size: 16px;
+    }
+
+    .list-wrapper {
+        width: 100%;
+        padding-left: 20px;
+    }
+
+    .mission {
+        padding: 40px 20px;
+    }
+
+    .mission-title h2 {
+        font-size: 28px;
+    }
+
+    .mission h3 {
+        font-size: 16px;
+    }
+
+    .cta h2 {
+        font-size: 36px;
+    }
+
+    .cta p {
+        font-size: 20px;
+    }
+
+    .btn-join {
+        padding: 12px 30px;
+        font-size: 20px;
+    }
+
+    .group-12-decor {
+        display: none;
+    }
+}
+
+/* Section Divider Line */
+.section-divider {
+    width: 80%;
+    /* Line-nte neelam 80% aaki set cheyyunnu */
+    max-width: 1000px;
+    /* Ettavum valiya size limit cheyyunnu */
+    margin: 40px auto;
+    /* Mukalilum thazheyum gap (40px) idan, pinne center aakkan (auto) */
+    border: none;
+    border-top: 1px solid #333333;
+    /* Dark background-il match aavunna oru subtle grey line */
+}

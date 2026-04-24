@@ -1,31 +1,63 @@
-import './SharedPageStyles.css';
+import React from 'react';
+import './about.css';
+
+// Components
+import FloatingBackground from '../components/FloatingBackground';
+import Hero from '../components/Hero';
+import WhoWeAre from '../components/WhoWeAre';
+import WhatWeDo from '../components/WhatWeDo';
+import Approach from '../components/Approach';
+import TextSection from '../components/TextSection';
+import Mission from '../components/Mission';
+import CTA from '../components/CTA';
 
 const About = () => {
-  return (
-    <div className="about-page">
-      <header className="page-header">
-        <div className="glow-white"></div>
-        <div className="container">
-          <h1 className="page-title">About <span className="text-accent">TekLearn</span></h1>
-          <p className="page-subtitle">We are on a mission to bridge the gap between academic learning and industry demands.</p>
-        </div>
-      </header>
-      
-      <section className="page-content container text-center">
-        <div style={{ maxWidth: '800px', margin: '0 auto', color: 'var(--text-secondary)', lineHeight: '1.8' }}>
-          <p style={{ marginBottom: '1.5rem' }}>
-            TekLearn was founded with a simple idea: education should lead directly to outcomes. 
-            We believe that the best way to learn is by doing real projects under the guidance of industry professionals.
-          </p>
-          <p>
-            Our community brings together thousands of learners, builders, and mentors to collaborate, innovate, and grow. 
-            Whether you are a college student looking for your first job, or a corporate professional upgrading your skills, 
-            TekLearn provides the platform and curriculum to accelerate your journey.
-          </p>
-        </div>
-      </section>
-    </div>
-  );
+    return (
+        <>
+            <FloatingBackground />
+            
+            <Hero />
+            <WhoWeAre />
+            <WhatWeDo />
+            <Approach />
+            
+            <TextSection 
+                title="Why Teklearn Exists"
+                subtitle={<>There is a growing gap between what students learn in college and <br/>what companies expect in the industry.</>}
+                listItems={[
+                    "Making learning practical and outcome-driven.",
+                    "Helping students gain real experience before graduation.",
+                    "Creating a clear path from learning to earning."
+                ]}
+            />
+
+            <TextSection 
+                title="Our Vision"
+                subtitle="To build a future where students graduate not just with degrees, but with:"
+                listItems={[
+                    "Real skills",
+                    "Real experience",
+                    "Real opportunities"
+                ]}
+                footer={<>Our aim is to create a generation of builders, creators, and problem-solvers<br/>who are ready to lead and grow in the modern world.</>}
+            />
+
+            <TextSection 
+                title="What Makes Us Different"
+                differences={true}
+                listItems={[
+                    "We don't just teach, we build projects that matter.",
+                    "Our focus is on a strictly practical approach.",
+                    "We simulate a real tech business environment.",
+                    "We guide manually on resumes and initial directions.",
+                    "Our goal is to help students become company ready faster."
+                ]}
+            />
+
+            <Mission />
+            <CTA />
+        </>
+    );
 };
 
 export default About;
