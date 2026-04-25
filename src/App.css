@@ -8,3 +8,18 @@
 main {
   flex-grow: 1;
 }
+
+/* -------------------------------------
+   GLOBAL CURSOR GLOW
+   ------------------------------------- */
+.cursor-glow {
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  transition: top 0.05s linear, left 0.05s linear;
+}

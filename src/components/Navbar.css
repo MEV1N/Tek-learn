@@ -1,10 +1,14 @@
 .navbar {
-  position: absolute; /* It's transparent and overlays the hero section */
+  position: fixed;
   top: 0;
   width: 100%;
-  z-index: 100;
-  padding: 2rem 0;
-  background-color: transparent;
+  z-index: 1000;
+  padding: 1rem 0;
+  background-color: rgba(5, 5, 5, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
 }
 
 .nav-container {
@@ -13,21 +17,10 @@
   align-items: center;
 }
 
-.logo-hexagon {
-  width: 48px;
-  height: 55px;
-  background-color: transparent;
-  border: 3px solid #ffffff;
-  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.logo-hexagon span {
-  color: #ffffff;
-  font-size: 1.8rem;
-  font-weight: 700;
+.nav-logo-img {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
 }
 
 .menu-icon {
@@ -60,7 +53,7 @@
   clip-path: circle(150% at calc(100% - 3rem) 3rem);
 }
 
-.nav-links a {
+.nav-links a:not(.btn) {
   color: #ffffff;
   font-size: 2rem;
   font-weight: 600;
@@ -68,7 +61,7 @@
   transition: color 0.3s ease;
 }
 
-.nav-links a:hover {
+.nav-links a:not(.btn):hover {
   color: var(--accent-color);
 }
 

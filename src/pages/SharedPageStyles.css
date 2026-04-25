@@ -22,6 +22,117 @@
 }
 
 /* Contact Form */
+.contact-map iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* --- Stacking Course Cards --- */
+.stacking-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding-bottom: 2rem;
+}
+
+.stacking-course-card {
+  position: sticky;
+  display: flex;
+  justify-content: space-between;
+  border-radius: 24px;
+  padding: 3rem;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+  margin-bottom: 2rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: transform 0.3s ease;
+}
+
+.card-content-left {
+  flex: 1;
+  max-width: 60%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.course-card-title {
+  font-size: 2.2rem;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.course-card-desc {
+  font-size: 1rem;
+  line-height: 1.6;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+}
+
+.course-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.course-card-meta .price {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.course-card-meta .duration {
+  display: flex;
+  align-items: center;
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.card-content-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  z-index: 1;
+  position: relative;
+}
+
+.card-bg-icon {
+  opacity: 0.5;
+  transform: scale(1.2);
+  transform-origin: center right;
+  color: #fff;
+}
+
+.custom-course-icon {
+  max-width: 250px;
+  max-height: 250px;
+  object-fit: contain;
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .stacking-course-card {
+    flex-direction: column-reverse;
+    padding: 2rem;
+  }
+  .card-content-left {
+    max-width: 100%;
+  }
+  .card-content-right {
+    justify-content: center;
+    margin-bottom: 2rem;
+  }
+  .custom-course-icon {
+    max-width: 150px;
+    max-height: 150px;
+  }
+}
+
 .contact-form {
   max-width: 600px;
   margin: 0 auto;

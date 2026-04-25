@@ -7,7 +7,7 @@ const Footer = () => {
     <footer className="footer">
       <div className="container footer-container">
         <div className="footer-brand">
-          <h3>Tek<span>Learn</span></h3>
+          <img src="/img/logo.png" alt="Teklearn Logo" className="footer-logo-img" />
           <p>Real projects. Real skills. Real outcomes. Learn from industry professionals.</p>
           <div className="social-links">
             <a href="#" aria-label="Email"><Mail size={20} /></a>
@@ -17,12 +17,7 @@ const Footer = () => {
         </div>
         
         <div className="footer-links">
-          <div className="link-group">
-            <h4>Programs</h4>
-            <Link to="/course">UI/UX with AI</Link>
-            <Link to="/course">Full Stack Dev</Link>
-            <Link to="/course">Data Science</Link>
-          </div>
+
           <div className="link-group">
             <h4>Company</h4>
             <Link to="/about">About Us</Link>
@@ -33,6 +28,9 @@ const Footer = () => {
       </div>
       <div className="footer-bottom">
         <p>&copy; {new Date().getFullYear()} TekLearn. All rights reserved.</p>
+        <p style={{ marginTop: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+          Made by <a href="https://www.hiveofficial.in/teams/Tech" target="_blank" rel="noopener noreferrer" style={{ color: '#fcd34d', textDecoration: 'none' }}>Hive Team</a>
+        </p>
       </div>
     </footer>
   );

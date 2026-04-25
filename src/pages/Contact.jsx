@@ -15,11 +15,11 @@ const Contact = () => {
         <form className="contact-form" onSubmit={(e) => e.preventDefault()}>
           <div className="form-group">
             <label htmlFor="name">Name</label>
-            <input type="text" id="name" className="form-control" placeholder="John Doe" />
+            <input type="text" id="name" className="form-control" />
           </div>
           <div className="form-group">
             <label htmlFor="email">Email</label>
-            <input type="email" id="email" className="form-control" placeholder="john@example.com" />
+            <input type="email" id="email" className="form-control" />
           </div>
           <div className="form-group">
             <label htmlFor="message">Message</label>

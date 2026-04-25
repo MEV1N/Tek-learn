@@ -2,12 +2,23 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, TrendingUp, Store, Users, Award, BookOpen, FileCode2, Monitor, PenTool, Database } from 'lucide-react';
 import CourseCard from '../components/CourseCard';
+import { useData } from '../context/DataContext';
 import './Home.css';
 
 const Home = () => {
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+  const { banners, courses } = useData();
   const [activeCourse, setActiveCourse] = useState(1); // 0, 1, 2
   const [activeFaq, setActiveFaq] = useState(null);
+  const [heroWordIndex, setHeroWordIndex] = useState(0);
+  const [bannerIndex, setBannerIndex] = useState(0);
+
+  const heroWords = ['Lead', 'Grow', 'Achieve'];
+
+  const getIconComponent = (iconName) => {
+    const icons = { Database, PenTool, FileCode2, TrendingUp, Store, Users, Award, BookOpen, Monitor };
+    const Icon = icons[iconName] || Database;
+    return <Icon size={48} />;
+  };
 
   const faqs = [
     {
@@ -25,57 +36,27 @@ const Home = () => {
   ];
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      setCursorPos({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    const wordInterval = setInterval(() => {
+      setHeroWordIndex((prev) => (prev + 1) % heroWords.length);
+    }, 3000);
+    return () => clearInterval(wordInterval);
   }, []);
 
-  const courses = [
-    {
-      title: "Data Science",
-      description: "Master Python, ML & data visualization with real datasets and capstone projects.",
-      price: "₹12,999",
-      duration: "3 Months",
-      icon: <Database size={48} />
-    },
-    {
-      title: "UI/UX with AI",
-      description: "Design stunning user experiences with Figma, prototyping, and AI-powered design tools.",
-      price: "₹9,999",
-      duration: "3 Months",
-      icon: <PenTool size={48} />
-    },
-    {
-      title: "Full Stack Development",
-      description: "Master MERN stack. Build scalable web applications from scratch with real-world projects.",
-      price: "₹14,999",
-      duration: "6 Months",
-      icon: <FileCode2 size={48} />
-    }
-  ];
+
 
   useEffect(() => {
+    const topCoursesLength = Math.min(courses.length, 3);
+    if (topCoursesLength === 0) return;
     const interval = setInterval(() => {
-      setActiveCourse((prev) => (prev + 1) % courses.length);
+      setActiveCourse((prev) => (prev + 1) % topCoursesLength);
     }, 3000);
     return () => clearInterval(interval);
-  }, [courses.length]);
+  }, [courses]);
 
 
 
   return (
     <div className="home">
-      {/* Glow Cursor Effect */}
-      <div 
-        className="cursor-glow" 
-        style={{ 
-          left: `${cursorPos.x}px`, 
-          top: `${cursorPos.y}px` 
-        }} 
-      />
-
       {/* 1. Hero Section - Main landing view */}
       <section className="hero">
         {/* Floating background animation wrapper */}
@@ -94,7 +75,9 @@ const Home = () => {
         
         {/* Main hero content container */}
         <div className="container hero-container">
-          <h1 className="hero-title text-gradient">Empowering The Youth<br/>To Lead</h1>
+          <h1 className="hero-title text-gradient">
+            Empowering The Youth<br/>To <span key={heroWordIndex} className="hero-animated-word">{heroWords[heroWordIndex]}</span>
+          </h1>
           <p className="hero-subtitle">
             Bridge the gap between education and industry with real-world,<br/>
             project-based learning designed for the next generation.
@@ -102,35 +85,54 @@ const Home = () => {
           {/* Call-to-action buttons for Hero section */}
           <div className="hero-cta">
             {/* Primary registration button */}
-            <button className="btn btn-outline-light">Join Now</button>
+            <Link to="/contact" className="btn btn-outline-light">Join Now</Link>
             {/* Secondary exploration button */}
-            <button className="btn btn-outline-light">Explore Courses</button>
+            <Link to="/course" className="btn btn-outline-light">Explore Courses</Link>
           </div>
         </div>
       </section>
 
-      {/* 2. Featured Programs Section - 2 cards */}
+      {/* 2. Featured Programs Section - Banner Slider */}
       <section className="featured-programs-section container">
-        {/* 2-column grid layout for featured items */}
-        <div className="grid-2">
-          {/* Card 1 */}
-          <div className="featured-card">
-            <h2><span className="text-accent">Hive</span> Internship Program</h2>
-            <p>Real-world experience with live startup projects.</p>
-            <button className="btn btn-outline-light mt-4" style={{ borderRadius: '30px' }}>Learn More</button>
+        <div className="banner-slider">
+          <div 
+            className="banner-arrow" 
+            onClick={() => setBannerIndex(prev => (prev === 0 ? banners.length - 1 : prev - 1))}
+          >
+            <ChevronLeft size={32} />
           </div>
-          {/* Card 2 */}
-          <div className="featured-card">
-            <h2><span className="text-accent">Pro</span> Mentorship</h2>
-            <p>1-on-1 guidance from top industry experts.</p>
-            <button className="btn btn-outline-light mt-4" style={{ borderRadius: '30px' }}>Explore</button>
+          
+          <div className="banner-content">
+            {banners.length > 0 && banners[bannerIndex] && (
+              <>
+                <h2><span>{banners[bannerIndex].highlight}</span> {banners[bannerIndex].title}</h2>
+                <p>{banners[bannerIndex].subtitle}</p>
+              </>
+            )}
+          </div>
+
+          <div 
+            className="banner-arrow" 
+            onClick={() => setBannerIndex(prev => (prev + 1) % banners.length)}
+          >
+            <ChevronRight size={32} />
+          </div>
+
+          <div className="banner-dots">
+            {banners.map((_, idx) => (
+              <div 
+                key={idx} 
+                className={`banner-dot ${idx === bannerIndex ? 'active' : ''}`}
+                onClick={() => setBannerIndex(idx)}
+              />
+            ))}
           </div>
         </div>
       </section>
 
       {/* 3. Why Choose Teklearn (Bento Box) - Feature highlights */}
       <section className="why-choose-bento section-padding container">
-        <h2 className="section-title text-center text-gradient" style={{ marginBottom: '1rem' }}>Why Choose Teklearn</h2>
+        <h2 className="section-title text-center" style={{ marginBottom: '1rem', color: '#fff' }}>Why Choose Teklearn</h2>
         <p className="section-subtitle text-center" style={{ marginBottom: '3rem' }}>Everything you need to launch your tech career with confidence.</p>
         
         {/* CSS Grid layout container for Bento Box items */}
@@ -183,7 +185,7 @@ const Home = () => {
         {/* Centered CTA container */}
         <div className="text-center" style={{ marginTop: '4rem' }}>
           {/* Primary journey starter button */}
-          <button className="btn btn-outline-light" style={{ padding: '1rem 2.5rem', borderRadius: '30px' }}>Start your Journey</button>
+          <Link to="/contact" className="btn btn-outline-light" style={{ padding: '1rem 2.5rem', borderRadius: '30px' }}>Start your Journey</Link>
         </div>
       </section>
 
@@ -204,7 +206,7 @@ const Home = () => {
           </div>
           
           {/* Button to navigate to Hive community page */}
-          <button className="btn btn-accent mt-4" style={{ padding: '0.8rem 2.5rem', borderRadius: '30px' }}>Explore Hive</button>
+          <a href="https://www.hiveofficial.in" target="_blank" rel="noopener noreferrer" className="btn btn-accent mt-4" style={{ padding: '0.8rem 2.5rem', borderRadius: '30px', textDecoration: 'none' }}>Explore Hive</a>
         </div>
       </section>
 
@@ -224,7 +226,7 @@ const Home = () => {
               <li>Faculty development programs</li>
             </ul>
             {/* Button to learn more about student programs */}
-            <button className="program-btn mt-auto">Learn More</button>
+            <button className="btn mt-auto">Learn More</button>
           </div>
           {/* Startup program card layout */}
           <div className="program-card">
@@ -236,7 +238,7 @@ const Home = () => {
               <li>Flexible engagement models</li>
             </ul>
             {/* Button to explore builder programs */}
-            <button className="program-btn mt-auto">Explore Program</button>
+            <button className="btn mt-auto">Explore Program</button>
           </div>
         </div>
       </section>
@@ -249,7 +251,7 @@ const Home = () => {
           
           {/* Container holding absolute-positioned coverflow items */}
           <div className="coverflow-container">
-            {courses.map((course, idx) => {
+            {courses.slice(0, 3).map((course, idx) => {
               let positionClass = 'hidden';
               if (idx === activeCourse) positionClass = 'active';
               else if (idx === activeCourse - 1) positionClass = 'prev';
@@ -268,7 +270,7 @@ const Home = () => {
                     description={course.description}
                     price={course.price}
                     duration={course.duration}
-                    imagePlaceholder={course.icon}
+                    imagePlaceholder={getIconComponent(course.iconName)}
                   />
                 </div>
               );
@@ -282,7 +284,7 @@ const Home = () => {
         <h2 className="section-title center">What Our Students Say</h2>
         {/* 2-column grid for testimonial cards */}
         <div className="grid-2 testimonials-two-col">
-          <div className="testimonial-card highlighted">
+          <div className="testimonial-card">
             <div className="stars">★★★★★</div>
             <p>"Teklearn completely transformed my career. The projects were real and mentors were amazing! Got placed within 2 months of completing."</p>
             <div className="student-info">
@@ -335,9 +337,9 @@ const Home = () => {
           {/* Flex container for bottom CTAs */}
           <div className="cta-buttons mt-4">
             {/* Final registration button */}
-            <button className="btn btn-outline-light" style={{ padding: '1rem 2.5rem', borderRadius: '30px' }}>Join Now</button>
+            <Link to="/contact" className="btn btn-outline-light" style={{ padding: '1rem 2.5rem', borderRadius: '30px' }}>Join Now</Link>
             {/* Consultation booking button */}
-            <button className="btn btn-outline-light" style={{ padding: '1rem 2.5rem', borderRadius: '30px' }}>Book Free Consultation</button>
+            <Link to="/contact" className="btn btn-outline-light" style={{ padding: '1rem 2.5rem', borderRadius: '30px' }}>Book Free Consultation</Link>
           </div>
         </div>
       </section>

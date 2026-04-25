@@ -10,9 +10,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="container nav-container">
         <Link to="/" className="logo">
-          <div className="logo-hexagon">
-            <span>T</span>
-          </div>
+          <img src="/img/logo.png" alt="Teklearn Logo" className="nav-logo-img" />
         </Link>
         
         <div className="menu-icon" onClick={() => setIsOpen(!isOpen)}>
@@ -23,9 +21,11 @@ const Navbar = () => {
         <ul className={`nav-links ${isOpen ? 'active' : ''}`}>
           <li><Link to="/" onClick={() => setIsOpen(false)}>Home</Link></li>
           <li><Link to="/about" onClick={() => setIsOpen(false)}>About</Link></li>
-          <li><Link to="/services" onClick={() => setIsOpen(false)}>Services</Link></li>
+          <li><Link to="/coming-soon" onClick={() => setIsOpen(false)}>Events</Link></li>
           <li><Link to="/course" onClick={() => setIsOpen(false)}>Courses</Link></li>
-          <li><Link to="/contact" className="btn btn-primary nav-btn" onClick={() => setIsOpen(false)}>Contact Us</Link></li>
+          <li><Link to="/hive" style={{ color: '#fcd34d' }} onClick={() => setIsOpen(false)}>Hive</Link></li>
+          <li><Link to="/coming-soon" onClick={() => setIsOpen(false)}>Portfolio</Link></li>
+          <li><Link to="/coming-soon" className="btn btn-light nav-btn" onClick={() => setIsOpen(false)}>Login</Link></li>
         </ul>
       </div>
     </nav>
