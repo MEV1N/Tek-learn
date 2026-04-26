@@ -190,3 +190,30 @@
     margin: 0.5rem 0;
   }
 }
+
+@media (max-width: 768px) {
+  .section-header h2 {
+    font-size: 2rem;
+  }
+
+  .mission-box {
+    padding: 2.5rem 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .mission-box h2 {
+    font-size: 2rem;
+  }
+
+  .mission-box p {
+    font-size: 1.2rem;
+  }
+
+  .about-cta {
+    padding: 3rem 0;
+  }
+
+  .about-cta h2 {
+    font-size: 2rem;
+  }
+}

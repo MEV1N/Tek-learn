@@ -483,6 +483,30 @@
 /* Responsive */
 @media (max-width: 768px) {
   .hero-title { font-size: 3rem; }
+  .hero-subtitle { font-size: 1rem; }
+  .hero-cta { flex-direction: column; width: 100%; gap: 1rem; }
+  .hero-cta .btn { width: 100%; }
+
+  .banner-slider { flex-direction: column; padding: 1.5rem; gap: 1.5rem; }
+  .banner-content h2 { font-size: 1.5rem; }
+
+  .join-hive-card { padding: 3rem 1.5rem; }
+  .hive-title { font-size: 2.5rem; }
+  .hive-subtitle { font-size: 1.5rem; }
+  .hive-features { gap: 1.5rem; }
+
+  .program-card { padding: 2rem; }
+  .program-card h3 { font-size: 1.5rem; }
+
   .coverflow-item.prev, .coverflow-item.next { opacity: 0; pointer-events: none; }
+  
+  .cta-card { padding: 2rem; }
+  .cta-card h2 { font-size: 1.8rem; }
   .cta-buttons { flex-direction: column; }
+}
+
+@media (max-width: 480px) {
+  .hero-title { font-size: 2.2rem; }
+  .hive-title { font-size: 2rem; }
+  .hive-subtitle { font-size: 1.2rem; }
 }
