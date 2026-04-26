@@ -190,7 +190,7 @@ const Home = () => {
       </section>
 
       {/* 4. Join Hive - Community building section */}
-      <section className="join-hive-wrapper container section-padding">
+      <section id="hive" className="join-hive-wrapper container section-padding">
         {/* Container with custom glowing border effect */}
         <div className="join-hive-card glowing-border">
           <h2 className="hive-title">Join <span className="text-accent">Hive</span></h2>

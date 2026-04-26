@@ -23,7 +23,21 @@ const Navbar = () => {
           <li><Link to="/about" onClick={() => setIsOpen(false)}>About</Link></li>
           <li><Link to="/coming-soon" onClick={() => setIsOpen(false)}>Events</Link></li>
           <li><Link to="/course" onClick={() => setIsOpen(false)}>Courses</Link></li>
-          <li><Link to="/hive" style={{ color: '#fcd34d' }} onClick={() => setIsOpen(false)}>Hive</Link></li>
+          <li>
+            <a 
+              href="/#hive" 
+              style={{ color: '#fcd34d', cursor: 'pointer' }} 
+              onClick={(e) => {
+                if (window.location.pathname === '/') {
+                  e.preventDefault();
+                  document.getElementById('hive')?.scrollIntoView({ behavior: 'smooth' });
+                }
+                setIsOpen(false);
+              }}
+            >
+              Hive
+            </a>
+          </li>
           <li><Link to="/coming-soon" onClick={() => setIsOpen(false)}>Portfolio</Link></li>
           <li><Link to="/coming-soon" className="btn btn-light nav-btn" onClick={() => setIsOpen(false)}>Login</Link></li>
         </ul>
