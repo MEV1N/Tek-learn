@@ -24,69 +24,74 @@
 }
 
 .menu-icon {
-  display: none;
+  display: flex;
   cursor: pointer;
   color: #ffffff;
   z-index: 101; /* To stay above overlay */
 }
 
 .nav-links {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(5, 5, 5, 0.98);
   display: flex;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 2rem;
+  gap: 1.5rem;
   list-style: none;
   margin: 0;
   padding: 0;
+  clip-path: circle(0px at calc(100% - 3rem) 3rem);
+  transition: clip-path 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-links.active {
+  clip-path: circle(150% at calc(100% - 3rem) 3rem);
 }
 
 .nav-links a:not(.btn) {
   color: #ffffff;
-  font-size: 1.1rem;
-  font-weight: 500;
+  font-size: 2rem;
+  font-weight: 700;
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, transform 0.3s ease;
 }
 
 .nav-links a:not(.btn):hover {
-  color: var(--accent-color);
+  color: #ffffff;
+  transform: translateY(-5px);
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+}
+
+/* Hive link hover */
+.nav-links a[href="/#hive"]:hover {
+  text-shadow: 0 0 20px rgba(252, 211, 77, 0.5) !important;
 }
 
 .nav-btn {
-  font-size: 1rem !important;
-  padding: 0.6rem 1.5rem;
+  font-size: 1.2rem !important;
+  padding: 0.8rem 2.5rem !important;
+  margin-top: 0.5rem;
 }
 
-/* Mobile Responsiveness */
+/* Mobile Responsiveness for Overlay Font Sizes */
 @media (max-width: 768px) {
-  .menu-icon {
-    display: flex;
-  }
-
   .nav-links {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(5, 5, 5, 0.95);
-    flex-direction: column;
-    justify-content: center;
-    gap: 2rem;
-    clip-path: circle(0px at calc(100% - 3rem) 3rem);
-    transition: clip-path 0.5s ease-in-out;
+    gap: 1.2rem;
+    clip-path: circle(0px at calc(100% - 2rem) 2rem);
   }
-
   .nav-links.active {
-    clip-path: circle(150% at calc(100% - 3rem) 3rem);
+    clip-path: circle(150% at calc(100% - 2rem) 2rem);
   }
-
   .nav-links a:not(.btn) {
-    font-size: 2rem;
-    font-weight: 600;
+    font-size: 1.5rem;
   }
-
   .nav-btn {
-    font-size: 1.5rem !important;
-    margin-top: 1rem;
+    font-size: 1.1rem !important;
+    padding: 0.6rem 1.8rem !important;
   }
 }
