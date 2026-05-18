@@ -82,11 +82,9 @@ const Home = () => {
             Bridge the gap between education and industry with real-world,<br/>
             project-based learning designed for the next generation.
           </p>
-          {/* Call-to-action buttons for Hero section */}
+          {/* Call-to-action button for Hero section */}
           <div className="hero-cta">
-            {/* Primary registration button */}
-            <Link to="/contact" className="btn btn-outline-light">Join Now</Link>
-            {/* Secondary exploration button */}
+            {/* Primary exploration button */}
             <Link to="/course" className="btn btn-outline-light">Explore Courses</Link>
           </div>
         </div>
@@ -102,7 +100,13 @@ const Home = () => {
             <ChevronLeft size={32} />
           </div>
           
-          <div className="banner-content">
+          <div 
+            className={`banner-content ${banners[bannerIndex]?.link ? 'banner-clickable' : ''}`}
+            onClick={() => {
+              const link = banners[bannerIndex]?.link;
+              if (link) window.open(link, '_blank', 'noopener,noreferrer');
+            }}
+          >
             {banners.length > 0 && banners[bannerIndex] && (
               <>
                 <h2><span>{banners[bannerIndex].highlight}</span> {banners[bannerIndex].title}</h2>

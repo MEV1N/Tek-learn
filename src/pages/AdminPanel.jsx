@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { Trash2, Plus, Edit2, Save, X } from 'lucide-react';
+import { Trash2, Plus, Edit2, Save, X, Image } from 'lucide-react';
 import './AdminPanel.css';
 
 const AdminPanel = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   
-  const { banners, setBanners, courses, setCourses } = useData();
+  const { banners, setBanners, courses, setCourses, galleryImages, setGalleryImages } = useData();
   
-  const [activeTab, setActiveTab] = useState('banners'); // 'banners' | 'courses'
+  const [activeTab, setActiveTab] = useState('banners'); // 'banners' | 'courses' | 'gallery'
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -22,13 +22,13 @@ const AdminPanel = () => {
 
   // --- Banner Handlers ---
   const [editingBanner, setEditingBanner] = useState(null);
-  const [newBanner, setNewBanner] = useState({ title: '', highlight: '', subtitle: '' });
+  const [newBanner, setNewBanner] = useState({ title: '', highlight: '', subtitle: '', link: '' });
 
   const handleAddBanner = (e) => {
     e.preventDefault();
     if (!newBanner.title) return;
     setBanners([...banners, { ...newBanner, id: Date.now() }]);
-    setNewBanner({ title: '', highlight: '', subtitle: '' });
+    setNewBanner({ title: '', highlight: '', subtitle: '', link: '' });
   };
 
   const handleDeleteBanner = (id) => {
@@ -78,6 +78,44 @@ const AdminPanel = () => {
     reader.readAsDataURL(file);
   };
 
+  // --- Gallery Handlers ---
+  const [editingGalleryImage, setEditingGalleryImage] = useState(null);
+  const [newGalleryImage, setNewGalleryImage] = useState({ src: '', caption: '', date: '' });
+
+  const handleGalleryImageUpload = (e, isEditing) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      if (isEditing) {
+        setEditingGalleryImage({ ...editingGalleryImage, src: reader.result });
+      } else {
+        setNewGalleryImage({ ...newGalleryImage, src: reader.result });
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAddGalleryImage = (e) => {
+    e.preventDefault();
+    if (!newGalleryImage.src) return;
+    setGalleryImages([...galleryImages, { ...newGalleryImage, id: Date.now() }]);
+    setNewGalleryImage({ src: '', caption: '', date: '' });
+    // Reset the file input
+    const fileInput = document.getElementById('gallery-file-input');
+    if (fileInput) fileInput.value = '';
+  };
+
+  const handleDeleteGalleryImage = (id) => {
+    setGalleryImages(galleryImages.filter(img => img.id !== id));
+  };
+
+  const handleUpdateGalleryImage = (e) => {
+    e.preventDefault();
+    setGalleryImages(galleryImages.map(img => img.id === editingGalleryImage.id ? editingGalleryImage : img));
+    setEditingGalleryImage(null);
+  };
+
 
   return (
     <div className="admin-page section-padding">
@@ -104,6 +142,7 @@ const AdminPanel = () => {
             <div className="admin-tabs">
           <button className={`admin-tab ${activeTab === 'banners' ? 'active' : ''}`} onClick={() => setActiveTab('banners')}>Manage Banners</button>
           <button className={`admin-tab ${activeTab === 'courses' ? 'active' : ''}`} onClick={() => setActiveTab('courses')}>Manage Courses</button>
+          <button className={`admin-tab ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => setActiveTab('gallery')}>Manage Gallery</button>
         </div>
 
         {activeTab === 'banners' && (
@@ -113,10 +152,11 @@ const AdminPanel = () => {
             {/* Add New Banner Form */}
             <form className="admin-form" onSubmit={handleAddBanner}>
               <h3>Add New Banner</h3>
-              <div className="form-row">
+              <div className="form-row" style={{ flexWrap: 'wrap' }}>
                 <input type="text" placeholder="Full Title (e.g., Internship program)" value={newBanner.title} onChange={e => setNewBanner({...newBanner, title: e.target.value})} required />
                 <input type="text" placeholder="Highlight Word (e.g., Hive)" value={newBanner.highlight} onChange={e => setNewBanner({...newBanner, highlight: e.target.value})} />
                 <input type="text" placeholder="Subtitle" value={newBanner.subtitle} onChange={e => setNewBanner({...newBanner, subtitle: e.target.value})} />
+                <input type="url" placeholder="Link URL (e.g., https://example.com)" value={newBanner.link} onChange={e => setNewBanner({...newBanner, link: e.target.value})} />
                 <button type="submit" className="btn btn-accent"><Plus size={18} /> Add</button>
               </div>
             </form>
@@ -126,10 +166,11 @@ const AdminPanel = () => {
               {banners.map(banner => (
                 <div key={banner.id} className="admin-card">
                   {editingBanner?.id === banner.id ? (
-                    <form className="admin-edit-form" onSubmit={handleUpdateBanner}>
+                    <form className="admin-edit-form" onSubmit={handleUpdateBanner} style={{ flexWrap: 'wrap' }}>
                       <input type="text" value={editingBanner.title} onChange={e => setEditingBanner({...editingBanner, title: e.target.value})} required />
                       <input type="text" value={editingBanner.highlight} onChange={e => setEditingBanner({...editingBanner, highlight: e.target.value})} />
                       <input type="text" value={editingBanner.subtitle} onChange={e => setEditingBanner({...editingBanner, subtitle: e.target.value})} />
+                      <input type="url" placeholder="Link URL" value={editingBanner.link || ''} onChange={e => setEditingBanner({...editingBanner, link: e.target.value})} />
                       <div className="action-buttons">
                         <button type="submit" className="btn-icon save"><Save size={18} /></button>
                         <button type="button" className="btn-icon cancel" onClick={() => setEditingBanner(null)}><X size={18} /></button>
@@ -140,6 +181,7 @@ const AdminPanel = () => {
                       <div className="card-info">
                         <h4><span style={{ color: 'var(--accent-color)'}}>{banner.highlight}</span> {banner.title}</h4>
                         <p>{banner.subtitle}</p>
+                        {banner.link && <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.3rem' }}>🔗 {banner.link}</p>}
                       </div>
                       <div className="action-buttons">
                         <button className="btn-icon edit" onClick={() => setEditingBanner(banner)}><Edit2 size={18} /></button>
@@ -218,6 +260,85 @@ const AdminPanel = () => {
                       <div className="action-buttons">
                         <button className="btn-icon edit" onClick={() => setEditingCourse(course)}><Edit2 size={18} /></button>
                         <button className="btn-icon delete" onClick={() => handleDeleteCourse(course.id)}><Trash2 size={18} /></button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'gallery' && (
+          <div className="admin-section">
+            <h2>Gallery (Events Page)</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Upload images to display on the Gallery page. Add captions and dates for context.</p>
+            
+            {/* Add New Gallery Image Form */}
+            <form className="admin-form" onSubmit={handleAddGalleryImage}>
+              <h3>Add New Image</h3>
+              <div className="form-grid">
+                <div className="full-width" style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                  <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Image size={16} /> Upload Image
+                  </label>
+                  <input 
+                    id="gallery-file-input"
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => handleGalleryImageUpload(e, false)} 
+                    style={{ padding: '0.5rem' }} 
+                    required
+                  />
+                  {newGalleryImage.src && (
+                    <img 
+                      src={newGalleryImage.src} 
+                      alt="Preview" 
+                      style={{ height: '120px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border-color)' }} 
+                    />
+                  )}
+                </div>
+                <input type="text" placeholder="Caption (e.g., Workshop Day 2024)" value={newGalleryImage.caption} onChange={e => setNewGalleryImage({...newGalleryImage, caption: e.target.value})} />
+                <input type="text" placeholder="Date (e.g., March 2024)" value={newGalleryImage.date} onChange={e => setNewGalleryImage({...newGalleryImage, date: e.target.value})} />
+                <button type="submit" className="btn btn-accent full-width mt-2"><Plus size={18} /> Add Image</button>
+              </div>
+            </form>
+
+            {/* List Existing Gallery Images */}
+            <div className="admin-list gallery-admin-list">
+              {galleryImages.length === 0 && (
+                <p style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '2rem' }}>No gallery images yet. Upload your first image above!</p>
+              )}
+              {galleryImages.map(img => (
+                <div key={img.id} className="admin-card gallery-card-admin">
+                  {editingGalleryImage?.id === img.id ? (
+                    <form className="admin-edit-form gallery-edit-form" onSubmit={handleUpdateGalleryImage}>
+                      <div className="gallery-edit-preview">
+                        <img src={editingGalleryImage.src} alt="Preview" className="gallery-admin-thumb" />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Replace image:</label>
+                          <input type="file" accept="image/*" onChange={(e) => handleGalleryImageUpload(e, true)} style={{ padding: '0.5rem' }} />
+                        </div>
+                      </div>
+                      <input type="text" placeholder="Caption" value={editingGalleryImage.caption} onChange={e => setEditingGalleryImage({...editingGalleryImage, caption: e.target.value})} />
+                      <input type="text" placeholder="Date" value={editingGalleryImage.date} onChange={e => setEditingGalleryImage({...editingGalleryImage, date: e.target.value})} />
+                      <div className="action-buttons">
+                        <button type="submit" className="btn-icon save"><Save size={18} /></button>
+                        <button type="button" className="btn-icon cancel" onClick={() => setEditingGalleryImage(null)}><X size={18} /></button>
+                      </div>
+                    </form>
+                  ) : (
+                    <>
+                      <div className="card-info" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                        <img src={img.src} alt={img.caption || 'Gallery'} className="gallery-admin-thumb" />
+                        <div>
+                          <h4>{img.caption || 'Untitled'}</h4>
+                          {img.date && <p style={{ fontSize: '0.85rem' }}>{img.date}</p>}
+                        </div>
+                      </div>
+                      <div className="action-buttons">
+                        <button className="btn-icon edit" onClick={() => setEditingGalleryImage(img)}><Edit2 size={18} /></button>
+                        <button className="btn-icon delete" onClick={() => handleDeleteGalleryImage(img.id)}><Trash2 size={18} /></button>
                       </div>
                     </>
                   )}

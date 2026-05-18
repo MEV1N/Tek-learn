@@ -3,8 +3,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const DataContext = createContext();
 
 const defaultBanners = [
-  { id: 1, title: "Internship program", highlight: "Hive", subtitle: "details" },
-  { id: 2, title: "Mentorship", highlight: "Pro", subtitle: "details" }
+  { id: 1, title: "Internship program", highlight: "Hive", subtitle: "details", link: "" },
+  { id: 2, title: "Mentorship", highlight: "Pro", subtitle: "details", link: "" }
 ];
 
 const defaultCourses = [
@@ -34,6 +34,8 @@ const defaultCourses = [
   }
 ];
 
+const defaultGalleryImages = [];
+
 export const DataProvider = ({ children }) => {
   const [banners, setBanners] = useState(() => {
     const saved = localStorage.getItem('teklearn_banners');
@@ -45,6 +47,11 @@ export const DataProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : defaultCourses;
   });
 
+  const [galleryImages, setGalleryImages] = useState(() => {
+    const saved = localStorage.getItem('teklearn_gallery');
+    return saved ? JSON.parse(saved) : defaultGalleryImages;
+  });
+
   useEffect(() => {
     localStorage.setItem('teklearn_banners', JSON.stringify(banners));
   }, [banners]);
@@ -53,8 +60,12 @@ export const DataProvider = ({ children }) => {
     localStorage.setItem('teklearn_courses', JSON.stringify(courses));
   }, [courses]);
 
+  useEffect(() => {
+    localStorage.setItem('teklearn_gallery', JSON.stringify(galleryImages));
+  }, [galleryImages]);
+
   return (
-    <DataContext.Provider value={{ banners, setBanners, courses, setCourses }}>
+    <DataContext.Provider value={{ banners, setBanners, courses, setCourses, galleryImages, setGalleryImages }}>
       {children}
     </DataContext.Provider>
   );

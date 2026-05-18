@@ -9,6 +9,7 @@ import Contact from './pages/Contact';
 import Course from './pages/Course';
 import AdminPanel from './pages/AdminPanel';
 import ComingSoon from './pages/ComingSoon';
+import Gallery from './pages/Gallery';
 import { DataProvider } from './context/DataContext';
 import './App.css';
 
@@ -42,6 +43,7 @@ function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/course" element={<Course />} />
               <Route path="/admin" element={<AdminPanel />} />
+              <Route path="/gallery" element={<Gallery />} />
               <Route path="/coming-soon" element={<ComingSoon />} />
             </Routes>
           </main>

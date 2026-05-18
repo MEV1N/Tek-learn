@@ -100,6 +100,21 @@
   flex-grow: 1;
 }
 
+.banner-content.banner-clickable {
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.banner-content.banner-clickable:hover {
+  transform: translateY(-2px);
+}
+
+.banner-content.banner-clickable:hover h2 {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
 .banner-content h2 {
   font-size: 2rem;
   margin-bottom: 0.5rem;
