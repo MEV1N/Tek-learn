@@ -7,9 +7,10 @@ const AdminPanel = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   
-  const { banners, setBanners, courses, setCourses, events, setEvents } = useData();
+  const { banners, courses, events, refreshData } = useData();
   
   const [activeTab, setActiveTab] = useState('banners'); // 'banners' | 'courses' | 'gallery'
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -24,21 +25,43 @@ const AdminPanel = () => {
   const [editingBanner, setEditingBanner] = useState(null);
   const [newBanner, setNewBanner] = useState({ title: '', highlight: '', subtitle: '', link: '' });
 
-  const handleAddBanner = (e) => {
+  const handleAddBanner = async (e) => {
     e.preventDefault();
-    if (!newBanner.title) return;
-    setBanners([...banners, { ...newBanner, id: Date.now() }]);
-    setNewBanner({ title: '', highlight: '', subtitle: '', link: '' });
+    if (!newBanner.title || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await fetch('/api/banners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newBanner)
+      });
+      setNewBanner({ title: '', highlight: '', subtitle: '', link: '' });
+      await refreshData();
+    } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
   };
 
-  const handleDeleteBanner = (id) => {
-    setBanners(banners.filter(b => b.id !== id));
+  const handleDeleteBanner = async (id) => {
+    if (isSubmitting || !confirm('Delete this banner?')) return;
+    setIsSubmitting(true);
+    try {
+      await fetch(`/api/banners/${id}`, { method: 'DELETE' });
+      await refreshData();
+    } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
   };
 
-  const handleUpdateBanner = (e) => {
+  const handleUpdateBanner = async (e) => {
     e.preventDefault();
-    setBanners(banners.map(b => b.id === editingBanner.id ? editingBanner : b));
-    setEditingBanner(null);
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await fetch(`/api/banners/${editingBanner.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingBanner)
+      });
+      setEditingBanner(null);
+      await refreshData();
+    } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
   };
 
   // --- Course Handlers ---
@@ -47,21 +70,43 @@ const AdminPanel = () => {
 
   const availableIcons = ['Database', 'PenTool', 'FileCode2', 'TrendingUp', 'Store', 'Users', 'Award', 'BookOpen', 'Monitor'];
 
-  const handleAddCourse = (e) => {
+  const handleAddCourse = async (e) => {
     e.preventDefault();
-    if (!newCourse.title) return;
-    setCourses([...courses, { ...newCourse, id: Date.now() }]);
-    setNewCourse({ title: '', description: '', price: '', duration: '', iconName: 'Database', customIcon: '' });
+    if (!newCourse.title || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await fetch('/api/courses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newCourse)
+      });
+      setNewCourse({ title: '', description: '', price: '', duration: '', iconName: 'Database', customIcon: '' });
+      await refreshData();
+    } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
   };
 
-  const handleDeleteCourse = (id) => {
-    setCourses(courses.filter(c => c.id !== id));
+  const handleDeleteCourse = async (id) => {
+    if (isSubmitting || !confirm('Delete this course?')) return;
+    setIsSubmitting(true);
+    try {
+      await fetch(`/api/courses/${id}`, { method: 'DELETE' });
+      await refreshData();
+    } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
   };
 
-  const handleUpdateCourse = (e) => {
+  const handleUpdateCourse = async (e) => {
     e.preventDefault();
-    setCourses(courses.map(c => c.id === editingCourse.id ? editingCourse : c));
-    setEditingCourse(null);
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await fetch(`/api/courses/${editingCourse.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingCourse)
+      });
+      setEditingCourse(null);
+      await refreshData();
+    } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
   };
 
   const handleImageUpload = (e, isEditing) => {
@@ -84,64 +129,112 @@ const AdminPanel = () => {
   const [managingImagesForEventId, setManagingImagesForEventId] = useState(null);
   const [newImageCaption, setNewImageCaption] = useState('');
 
-  const handleEventCoverUpload = (e, isEditing) => {
+  const handleEventCoverUpload = async (e, isEditing) => {
     const file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
+    
+    // Convert to base64 for quick preview (or use URL.createObjectURL)
+    // We will upload it directly now
+    alert('Uploading image, please wait...');
+    
+    // Wait, let's use the cloudinary upload utility for this instead!
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      
       if (isEditing) {
-        setEditingEvent({ ...editingEvent, coverImage: reader.result });
+        setEditingEvent({ ...editingEvent, coverImage: data.url });
       } else {
-        setNewEvent({ ...newEvent, coverImage: reader.result });
+        setNewEvent({ ...newEvent, coverImage: data.url });
       }
-    };
-    reader.readAsDataURL(file);
+      alert('Image uploaded successfully!');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to upload image');
+    }
   };
 
-  const handleAddEvent = (e) => {
+  const handleAddEvent = async (e) => {
     e.preventDefault();
-    if (!newEvent.title || !newEvent.coverImage) return;
-    setEvents([...events, { ...newEvent, id: Date.now() }]);
-    setNewEvent({ title: '', date: '', coverImage: '', images: [] });
-    const fileInput = document.getElementById('event-cover-input');
-    if (fileInput) fileInput.value = '';
+    if (!newEvent.title || !newEvent.coverImage || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await fetch('/api/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newEvent)
+      });
+      setNewEvent({ title: '', date: '', coverImage: '', images: [] });
+      const fileInput = document.getElementById('event-cover-input');
+      if (fileInput) fileInput.value = '';
+      await refreshData();
+    } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
   };
 
-  const handleDeleteEvent = (id) => {
-    setEvents(events.filter(ev => ev.id !== id));
+  const handleDeleteEvent = async (id) => {
+    if (isSubmitting || !confirm('Delete this event?')) return;
+    setIsSubmitting(true);
+    try {
+      await fetch(`/api/events/${id}`, { method: 'DELETE' });
+      await refreshData();
+    } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
   };
 
-  const handleUpdateEvent = (e) => {
+  const handleUpdateEvent = async (e) => {
     e.preventDefault();
-    setEvents(events.map(ev => ev.id === editingEvent.id ? editingEvent : ev));
-    setEditingEvent(null);
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await fetch(`/api/events/${editingEvent.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editingEvent)
+      });
+      setEditingEvent(null);
+      await refreshData();
+    } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
   };
 
-  const handleAddImageToEvent = (e, eventId) => {
+  const handleAddImageToEvent = async (e, eventId) => {
     const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const newImg = { id: Date.now(), src: reader.result, caption: newImageCaption };
-      setEvents(events.map(ev => {
-        if (ev.id === eventId) {
-          return { ...ev, images: [...(ev.images || []), newImg] };
-        }
-        return ev;
-      }));
+    if (!file || isSubmitting) return;
+    
+    setIsSubmitting(true);
+    try {
+      // 1. Upload to cloudinary via backend
+      const formData = new FormData();
+      formData.append('file', file);
+      const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData });
+      const { url } = await uploadRes.json();
+      
+      // 2. Add to event_images via backend
+      await fetch(`/api/events/${eventId}/images`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ src: url })
+      });
+      
       setNewImageCaption('');
       e.target.value = '';
-    };
-    reader.readAsDataURL(file);
+      await refreshData();
+    } catch (err) {
+      console.error(err);
+      alert('Failed to upload image');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDeleteImageFromEvent = (eventId, imageId) => {
-    setEvents(events.map(ev => {
-      if (ev.id === eventId) {
-        return { ...ev, images: (ev.images || []).filter(img => img.id !== imageId) };
-      }
-      return ev;
-    }));
+  const handleDeleteImageFromEvent = async (eventId, imageId) => {
+    if (isSubmitting || !confirm('Delete this image?')) return;
+    setIsSubmitting(true);
+    try {
+      await fetch(`/api/events/images/${imageId}`, { method: 'DELETE' });
+      await refreshData();
+    } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
   };
 
 

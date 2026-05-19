@@ -43,8 +43,42 @@ app.get('/api/banners', async (req, res) => {
   }
 });
 
-// For AdminPanel we might need POST, PUT, DELETE for banners, but based on DataContext it was just saving all at once.
-// We'll create basic endpoints.
+app.post('/api/banners', async (req, res) => {
+  const { title, highlight, subtitle, link } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO banners (title, highlight, subtitle, link) VALUES ($1, $2, $3, $4) RETURNING *',
+      [title, highlight, subtitle, link]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/banners/:id', async (req, res) => {
+  const { id } = req.params;
+  const { title, highlight, subtitle, link } = req.body;
+  try {
+    const result = await pool.query(
+      'UPDATE banners SET title = $1, highlight = $2, subtitle = $3, link = $4 WHERE id = $5 RETURNING *',
+      [title, highlight, subtitle, link, id]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/banners/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM banners WHERE id = $1', [id]);
+    res.json({ message: 'Deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // --- Courses ---
 
@@ -52,6 +86,43 @@ app.get('/api/courses', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM courses ORDER BY id ASC');
     res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/courses', async (req, res) => {
+  const { title, description, price, duration, iconName } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO courses (title, description, price, duration, iconName) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [title, description, price, duration, iconName]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/courses/:id', async (req, res) => {
+  const { id } = req.params;
+  const { title, description, price, duration, iconName } = req.body;
+  try {
+    const result = await pool.query(
+      'UPDATE courses SET title = $1, description = $2, price = $3, duration = $4, iconName = $5 WHERE id = $6 RETURNING *',
+      [title, description, price, duration, iconName, id]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/courses/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM courses WHERE id = $1', [id]);
+    res.json({ message: 'Deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -86,6 +157,20 @@ app.post('/api/events', async (req, res) => {
       [title, date, coverImage]
     );
     res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.put('/api/events/:id', async (req, res) => {
+  const { id } = req.params;
+  const { title, date, coverImage } = req.body;
+  try {
+    const result = await pool.query(
+      'UPDATE events SET title = $1, date = $2, coverImage = $3 WHERE id = $4 RETURNING *',
+      [title, date, coverImage, id]
+    );
+    res.json(result.rows[0]);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

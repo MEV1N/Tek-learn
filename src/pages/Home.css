@@ -522,6 +522,7 @@
   /* Featured Programs Banner */
   .featured-programs-section {
     margin-top: -1.5rem;
+    margin-bottom: 4rem; /* Added gap below banner */
   }
   .banner-slider { 
     flex-direction: row; 
@@ -544,6 +545,9 @@
   }
 
   /* Why Choose Teklearn */
+  .why-choose-bento {
+    margin-bottom: 4rem; /* Added gap below bento box */
+  }
   .bento-item {
     padding: 2rem !important;
   }
@@ -555,6 +559,9 @@
   }
 
   /* Join Hive */
+  .join-hive-wrapper {
+    margin-bottom: 4rem; /* Added gap below Join Hive */
+  }
   .join-hive-card { 
     padding: 3rem 1.5rem; 
     border-radius: 20px;
@@ -615,6 +622,9 @@
   }
 
   /* FAQs */
+  .faq-section {
+    margin-bottom: 4rem; /* Added gap below FAQ */
+  }
   .faq-list { 
     margin-top: 2rem; 
     gap: 1rem; 

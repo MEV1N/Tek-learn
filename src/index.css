@@ -220,11 +220,11 @@ button {
   }
   
   .section-padding {
-    padding: 3rem 0;
+    padding: 5rem 0; /* Increased gap */
   }
   
   .section {
-    padding: 2.5rem 0;
+    padding: 4rem 0; /* Increased gap */
   }
   
   .container {
