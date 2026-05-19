@@ -18,6 +18,11 @@
   padding: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   background-color: var(--bg-color);
@@ -25,6 +30,7 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -49,12 +55,6 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: -0.03em;
-  font-weight: 700;
 }
 
 a {
@@ -107,17 +107,6 @@ button {
   }
 }
 
-.text-gradient {
-  background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.section-padding {
-  padding: 6rem 0;
-}
-
 /* Button Component Styles */
 .btn {
   display: inline-flex;
@@ -135,6 +124,7 @@ button {
   position: relative;
   overflow: hidden;
   z-index: 1;
+  min-height: 44px; /* Minimum touch target */
 }
 
 .btn::before {
@@ -160,8 +150,6 @@ button {
 .btn:hover::before {
   transform: scaleX(1);
 }
-
-/* Fallback variants pointing to base button to ensure consistency */
 
 /* Light button variant */
 .btn-light {
@@ -222,7 +210,7 @@ button {
    ------------------------------------- */
 @media (max-width: 768px) {
   .section-title {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     margin-bottom: 0.8rem;
   }
   
@@ -240,11 +228,42 @@ button {
   }
   
   .container {
-    padding: 0 1.2rem;
+    padding: 0 1rem;
   }
   
   .btn {
-    padding: 0.8rem 1.8rem;
-    font-size: 1rem;
+    padding: 0.85rem 1.8rem;
+    font-size: 0.95rem;
+  }
+
+  /* Reduce glow sizes on mobile to avoid overflow */
+  .glow-white {
+    width: 300px;
+    height: 300px;
+  }
+
+  .glow-yellow {
+    width: 250px;
+    height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-title {
+    font-size: 1.8rem;
+  }
+
+  .section-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .container {
+    padding: 0 0.8rem;
+  }
+
+  .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
   }
 }

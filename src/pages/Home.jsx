@@ -79,8 +79,7 @@ const Home = () => {
             Empowering The Youth<br/>To <span key={heroWordIndex} className="hero-animated-word">{heroWords[heroWordIndex]}</span>
           </h1>
           <p className="hero-subtitle">
-            Bridge the gap between education and industry with real-world,<br/>
-            project-based learning designed for the next generation.
+            Bridge the gap between education and industry with real-world, project-based learning designed for the next generation.
           </p>
           {/* Call-to-action button for Hero section */}
           <div className="hero-cta">

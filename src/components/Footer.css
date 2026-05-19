@@ -48,6 +48,11 @@
 .social-links a {
   color: var(--text-secondary);
   transition: color 0.3s ease, transform 0.3s ease;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .social-links a:hover {
@@ -72,6 +77,9 @@
   margin-bottom: 0.8rem;
   font-size: 0.9rem;
   transition: color 0.3s ease;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
 }
 
 .link-group a:hover {
@@ -86,14 +94,87 @@
   font-size: 0.85rem;
 }
 
+/* =============================================
+   FOOTER MOBILE RESPONSIVE STYLES
+   ============================================= */
+
 @media (max-width: 768px) {
+  .footer {
+    padding: 3rem 0 0 0;
+  }
+
   .footer-container {
     flex-direction: column;
     gap: 2rem;
+    margin-bottom: 2rem;
   }
-  
+
+  .footer-brand {
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .footer-brand p {
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .footer-logo-img {
+    height: 38px;
+    margin-bottom: 1rem;
+  }
+
+  .social-links {
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .footer-links {
+    flex-direction: row;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .link-group {
+    text-align: center;
+    min-width: 120px;
+  }
+
+  .link-group a {
+    justify-content: center;
+  }
+
+  .footer-bottom {
+    padding: 1rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer {
+    padding: 2rem 0 0 0;
+  }
+
+  .footer-brand h3 {
+    font-size: 1.6rem;
+  }
+
+  .footer-brand p {
+    font-size: 0.85rem;
+  }
+
+  .footer-logo-img {
+    height: 32px;
+  }
+
   .footer-links {
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.5rem;
+  }
+
+  .footer-bottom {
+    font-size: 0.75rem;
   }
 }

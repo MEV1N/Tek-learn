@@ -34,7 +34,7 @@ const defaultCourses = [
   }
 ];
 
-const defaultGalleryImages = [];
+const defaultEvents = [];
 
 export const DataProvider = ({ children }) => {
   const [banners, setBanners] = useState(() => {
@@ -47,9 +47,26 @@ export const DataProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : defaultCourses;
   });
 
-  const [galleryImages, setGalleryImages] = useState(() => {
-    const saved = localStorage.getItem('teklearn_gallery');
-    return saved ? JSON.parse(saved) : defaultGalleryImages;
+  const [events, setEvents] = useState(() => {
+    // Attempt to load events
+    const saved = localStorage.getItem('teklearn_events');
+    if (saved) return JSON.parse(saved);
+    
+    // Migration: If there are old flat gallery images, put them in a default event
+    const oldGallery = localStorage.getItem('teklearn_gallery');
+    if (oldGallery) {
+      const parsedOld = JSON.parse(oldGallery);
+      if (parsedOld && parsedOld.length > 0) {
+        return [{
+          id: Date.now(),
+          title: "Legacy Gallery",
+          date: "Before Migration",
+          coverImage: parsedOld[0].src,
+          images: parsedOld
+        }];
+      }
+    }
+    return defaultEvents;
   });
 
   useEffect(() => {
@@ -61,11 +78,11 @@ export const DataProvider = ({ children }) => {
   }, [courses]);
 
   useEffect(() => {
-    localStorage.setItem('teklearn_gallery', JSON.stringify(galleryImages));
-  }, [galleryImages]);
+    localStorage.setItem('teklearn_events', JSON.stringify(events));
+  }, [events]);
 
   return (
-    <DataContext.Provider value={{ banners, setBanners, courses, setCourses, galleryImages, setGalleryImages }}>
+    <DataContext.Provider value={{ banners, setBanners, courses, setCourses, events, setEvents }}>
       {children}
     </DataContext.Provider>
   );

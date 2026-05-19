@@ -28,6 +28,10 @@
   cursor: pointer;
   color: #ffffff;
   z-index: 101; /* To stay above overlay */
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-links {
@@ -80,6 +84,14 @@
 
 /* Mobile Responsiveness for Overlay Font Sizes */
 @media (max-width: 768px) {
+  .navbar {
+    padding: 0.75rem 0;
+  }
+
+  .nav-logo-img {
+    height: 34px;
+  }
+
   .nav-links {
     gap: 1.2rem;
     clip-path: circle(0px at calc(100% - 2rem) 2rem);
@@ -93,5 +105,19 @@
   .nav-btn {
     font-size: 1.1rem !important;
     padding: 0.6rem 1.8rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-logo-img {
+    height: 30px;
+  }
+
+  .nav-links a:not(.btn) {
+    font-size: 1.3rem;
+  }
+
+  .nav-links {
+    gap: 1rem;
   }
 }

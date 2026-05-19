@@ -101,3 +101,70 @@
   background-color: var(--text-primary);
   color: #000;
 }
+
+/* =============================================
+   COURSE CARD MOBILE RESPONSIVE STYLES
+   ============================================= */
+
+@media (max-width: 768px) {
+  .course-card {
+    border-radius: 14px;
+  }
+
+  .course-image {
+    height: 160px;
+  }
+
+  .course-content {
+    padding: 1.2rem;
+  }
+
+  .course-title {
+    font-size: 1.1rem;
+  }
+
+  .course-desc {
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+
+  .course-meta {
+    margin-bottom: 1rem;
+    padding-top: 0.8rem;
+  }
+
+  .price {
+    font-size: 1.1rem;
+  }
+
+  .duration {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .course-card {
+    border-radius: 12px;
+  }
+
+  .course-image {
+    height: 140px;
+  }
+
+  .course-content {
+    padding: 1rem;
+  }
+
+  .course-title {
+    font-size: 1rem;
+  }
+
+  .course-desc {
+    font-size: 0.82rem;
+  }
+
+  .tag {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+  }
+}

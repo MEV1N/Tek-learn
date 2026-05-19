@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import './Gallery.css';
 
 const Gallery = () => {
-  const { galleryImages } = useData();
+  const { events } = useData();
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [lightboxIndex, setLightboxIndex] = useState(null);
 
   const openLightbox = (index) => setLightboxIndex(index);
@@ -12,12 +13,16 @@ const Gallery = () => {
 
   const goNext = (e) => {
     e.stopPropagation();
-    setLightboxIndex((prev) => (prev + 1) % galleryImages.length);
+    if (selectedEvent && selectedEvent.images) {
+      setLightboxIndex((prev) => (prev + 1) % selectedEvent.images.length);
+    }
   };
 
   const goPrev = (e) => {
     e.stopPropagation();
-    setLightboxIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1));
+    if (selectedEvent && selectedEvent.images) {
+      setLightboxIndex((prev) => (prev === 0 ? selectedEvent.images.length - 1 : prev - 1));
+    }
   };
 
   return (
@@ -26,74 +31,127 @@ const Gallery = () => {
         <div className="gallery-hero-glow"></div>
         <div className="gallery-hero-glow-2"></div>
         <div className="container">
-          <h1 className="gallery-title">
-            Our <span className="text-gradient-accent">Gallery</span>
-          </h1>
-          <p className="gallery-subtitle">
-            Moments captured from our events, workshops, and community gatherings.
-          </p>
+          {selectedEvent ? (
+            <div className="selected-event-header">
+              <button className="btn-back" onClick={() => setSelectedEvent(null)}>
+                <ArrowLeft size={20} /> Back to Events
+              </button>
+              <h1 className="gallery-title">{selectedEvent.title}</h1>
+              <p className="gallery-subtitle">{selectedEvent.date}</p>
+            </div>
+          ) : (
+            <>
+              <h1 className="gallery-title">
+                Our <span className="text-gradient-accent">Events</span>
+              </h1>
+              <p className="gallery-subtitle">
+                Moments captured from our events, workshops, and community gatherings.
+              </p>
+            </>
+          )}
         </div>
       </header>
 
       <section className="gallery-content container">
-        {galleryImages.length === 0 ? (
-          <div className="gallery-empty">
-            <div className="empty-icon">📸</div>
-            <h3>No images yet</h3>
-            <p>Gallery images will appear here once added by an admin.</p>
-          </div>
-        ) : (
-          <div className="gallery-masonry">
-            {galleryImages.map((img, index) => (
-              <div
-                key={img.id}
-                className="gallery-item"
-                onClick={() => openLightbox(index)}
-                style={{ animationDelay: `${index * 0.08}s` }}
-              >
-                <img src={img.src} alt={img.caption || 'Gallery image'} loading="lazy" />
-                <div className="gallery-item-overlay">
-                  <span className="gallery-item-caption">{img.caption}</span>
-                  {img.date && <span className="gallery-item-date">{img.date}</span>}
-                </div>
+        {!selectedEvent ? (
+          /* Events List View */
+          <>
+            {(!events || events.length === 0) ? (
+              <div className="gallery-empty">
+                <div className="empty-icon">📅</div>
+                <h3>No events yet</h3>
+                <p>Events and albums will appear here once added by an admin.</p>
               </div>
-            ))}
-          </div>
+            ) : (
+              <div className="events-grid">
+                {events.map((ev, index) => (
+                  <div 
+                    key={ev.id} 
+                    className="event-album-card"
+                    onClick={() => setSelectedEvent(ev)}
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <div className="album-cover">
+                      <img src={ev.coverImage} alt={ev.title} loading="lazy" />
+                      <div className="album-overlay">
+                        <span>View Album</span>
+                      </div>
+                    </div>
+                    <div className="album-info">
+                      <h3>{ev.title}</h3>
+                      <p>{ev.date}</p>
+                      <span className="photo-count">{(ev.images || []).length} Photos</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          /* Specific Event Images View */
+          <>
+            {(!selectedEvent.images || selectedEvent.images.length === 0) ? (
+              <div className="gallery-empty">
+                <div className="empty-icon">📸</div>
+                <h3>No images yet</h3>
+                <p>Images for this event will appear here once added by an admin.</p>
+              </div>
+            ) : (
+              <div className="gallery-masonry">
+                {selectedEvent.images.map((img, index) => (
+                  <div
+                    key={img.id}
+                    className="gallery-item"
+                    onClick={() => openLightbox(index)}
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                  >
+                    <img src={img.src} alt={img.caption || 'Gallery image'} loading="lazy" />
+                    {img.caption && (
+                      <div className="gallery-item-overlay">
+                        <span className="gallery-item-caption">{img.caption}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </section>
 
       {/* Lightbox Modal */}
-      {lightboxIndex !== null && galleryImages[lightboxIndex] && (
+      {lightboxIndex !== null && selectedEvent && selectedEvent.images && selectedEvent.images[lightboxIndex] && (
         <div className="lightbox-overlay" onClick={closeLightbox}>
           <button className="lightbox-close" onClick={closeLightbox}>
             <X size={28} />
           </button>
           
-          <button className="lightbox-nav lightbox-prev" onClick={goPrev}>
-            <ChevronLeft size={36} />
-          </button>
+          {selectedEvent.images.length > 1 && (
+            <button className="lightbox-nav lightbox-prev" onClick={goPrev}>
+              <ChevronLeft size={36} />
+            </button>
+          )}
           
           <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
             <img
-              src={galleryImages[lightboxIndex].src}
-              alt={galleryImages[lightboxIndex].caption || 'Gallery image'}
+              src={selectedEvent.images[lightboxIndex].src}
+              alt={selectedEvent.images[lightboxIndex].caption || 'Gallery image'}
             />
-            {galleryImages[lightboxIndex].caption && (
+            {selectedEvent.images[lightboxIndex].caption && (
               <div className="lightbox-caption">
-                <p>{galleryImages[lightboxIndex].caption}</p>
-                {galleryImages[lightboxIndex].date && (
-                  <span className="lightbox-date">{galleryImages[lightboxIndex].date}</span>
-                )}
+                <p>{selectedEvent.images[lightboxIndex].caption}</p>
               </div>
             )}
           </div>
           
-          <button className="lightbox-nav lightbox-next" onClick={goNext}>
-            <ChevronRight size={36} />
-          </button>
+          {selectedEvent.images.length > 1 && (
+            <button className="lightbox-nav lightbox-next" onClick={goNext}>
+              <ChevronRight size={36} />
+            </button>
+          )}
 
           <div className="lightbox-counter">
-            {lightboxIndex + 1} / {galleryImages.length}
+            {lightboxIndex + 1} / {selectedEvent.images.length}
           </div>
         </div>
       )}

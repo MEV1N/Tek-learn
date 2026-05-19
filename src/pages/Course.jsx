@@ -20,16 +20,15 @@ const Course = () => {
   return (
     <div className="course-page">
       {/* Hero Section matching screenshot */}
-      <header className="page-header" style={{ padding: '8rem 0 5rem 0' }}>
+      <header className="page-header course-page-header">
         <div className="container">
-          <h1 className="page-title" style={{ color: '#fff', fontSize: '3.5rem', lineHeight: '1.2', maxWidth: '800px', margin: '0 auto 1.5rem auto' }}>
-            Tech Courses with<br/>internships
+          <h1 className="page-title course-page-title" style={{ color: '#fff' }}>
+            Tech Courses with internships
           </h1>
-          <p className="page-subtitle" style={{ fontSize: '1.1rem', marginBottom: '3rem' }}>
-            Bridge the gap between education and industry with real-world,<br/>
-            project-based learning designed for the next generation.
+          <p className="page-subtitle" style={{ marginBottom: '3rem' }}>
+            Bridge the gap between education and industry with real-world, project-based learning designed for the next generation.
           </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+          <div className="course-hero-buttons">
             <button className="btn btn-light" style={{ borderRadius: '30px', padding: '0.8rem 2rem', fontWeight: '600' }}>Explore Courses</button>
             <button className="btn btn-dark" style={{ borderRadius: '30px', padding: '0.8rem 2rem', fontWeight: '600' }}>Contact us</button>
           </div>

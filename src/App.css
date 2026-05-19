@@ -23,3 +23,16 @@ main {
   z-index: 0;
   transition: top 0.05s linear, left 0.05s linear;
 }
+
+/* Hide cursor glow on touch devices */
+@media (hover: none) and (pointer: coarse) {
+  .cursor-glow {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .cursor-glow {
+    display: none !important;
+  }
+}

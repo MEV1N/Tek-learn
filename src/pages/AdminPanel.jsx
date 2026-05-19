@@ -7,7 +7,7 @@ const AdminPanel = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   
-  const { banners, setBanners, courses, setCourses, galleryImages, setGalleryImages } = useData();
+  const { banners, setBanners, courses, setCourses, events, setEvents } = useData();
   
   const [activeTab, setActiveTab] = useState('banners'); // 'banners' | 'courses' | 'gallery'
 
@@ -78,42 +78,70 @@ const AdminPanel = () => {
     reader.readAsDataURL(file);
   };
 
-  // --- Gallery Handlers ---
-  const [editingGalleryImage, setEditingGalleryImage] = useState(null);
-  const [newGalleryImage, setNewGalleryImage] = useState({ src: '', caption: '', date: '' });
+  // --- Event Handlers ---
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [newEvent, setNewEvent] = useState({ title: '', date: '', coverImage: '', images: [] });
+  const [managingImagesForEventId, setManagingImagesForEventId] = useState(null);
+  const [newImageCaption, setNewImageCaption] = useState('');
 
-  const handleGalleryImageUpload = (e, isEditing) => {
+  const handleEventCoverUpload = (e, isEditing) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onloadend = () => {
       if (isEditing) {
-        setEditingGalleryImage({ ...editingGalleryImage, src: reader.result });
+        setEditingEvent({ ...editingEvent, coverImage: reader.result });
       } else {
-        setNewGalleryImage({ ...newGalleryImage, src: reader.result });
+        setNewEvent({ ...newEvent, coverImage: reader.result });
       }
     };
     reader.readAsDataURL(file);
   };
 
-  const handleAddGalleryImage = (e) => {
+  const handleAddEvent = (e) => {
     e.preventDefault();
-    if (!newGalleryImage.src) return;
-    setGalleryImages([...galleryImages, { ...newGalleryImage, id: Date.now() }]);
-    setNewGalleryImage({ src: '', caption: '', date: '' });
-    // Reset the file input
-    const fileInput = document.getElementById('gallery-file-input');
+    if (!newEvent.title || !newEvent.coverImage) return;
+    setEvents([...events, { ...newEvent, id: Date.now() }]);
+    setNewEvent({ title: '', date: '', coverImage: '', images: [] });
+    const fileInput = document.getElementById('event-cover-input');
     if (fileInput) fileInput.value = '';
   };
 
-  const handleDeleteGalleryImage = (id) => {
-    setGalleryImages(galleryImages.filter(img => img.id !== id));
+  const handleDeleteEvent = (id) => {
+    setEvents(events.filter(ev => ev.id !== id));
   };
 
-  const handleUpdateGalleryImage = (e) => {
+  const handleUpdateEvent = (e) => {
     e.preventDefault();
-    setGalleryImages(galleryImages.map(img => img.id === editingGalleryImage.id ? editingGalleryImage : img));
-    setEditingGalleryImage(null);
+    setEvents(events.map(ev => ev.id === editingEvent.id ? editingEvent : ev));
+    setEditingEvent(null);
+  };
+
+  const handleAddImageToEvent = (e, eventId) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const newImg = { id: Date.now(), src: reader.result, caption: newImageCaption };
+      setEvents(events.map(ev => {
+        if (ev.id === eventId) {
+          return { ...ev, images: [...(ev.images || []), newImg] };
+        }
+        return ev;
+      }));
+      setNewImageCaption('');
+      e.target.value = '';
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDeleteImageFromEvent = (eventId, imageId) => {
+    setEvents(events.map(ev => {
+      if (ev.id === eventId) {
+        return { ...ev, images: (ev.images || []).filter(img => img.id !== imageId) };
+      }
+      return ev;
+    }));
   };
 
 
@@ -142,7 +170,7 @@ const AdminPanel = () => {
             <div className="admin-tabs">
           <button className={`admin-tab ${activeTab === 'banners' ? 'active' : ''}`} onClick={() => setActiveTab('banners')}>Manage Banners</button>
           <button className={`admin-tab ${activeTab === 'courses' ? 'active' : ''}`} onClick={() => setActiveTab('courses')}>Manage Courses</button>
-          <button className={`admin-tab ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => setActiveTab('gallery')}>Manage Gallery</button>
+          <button className={`admin-tab ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => setActiveTab('gallery')}>Manage Events</button>
         </div>
 
         {activeTab === 'banners' && (
@@ -271,77 +299,107 @@ const AdminPanel = () => {
 
         {activeTab === 'gallery' && (
           <div className="admin-section">
-            <h2>Gallery (Events Page)</h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Upload images to display on the Gallery page. Add captions and dates for context.</p>
+            <h2>Events & Albums</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Create events and upload images to display them as albums on the Gallery page.</p>
             
-            {/* Add New Gallery Image Form */}
-            <form className="admin-form" onSubmit={handleAddGalleryImage}>
-              <h3>Add New Image</h3>
+            {/* Add New Event Form */}
+            <form className="admin-form" onSubmit={handleAddEvent}>
+              <h3>Create New Event</h3>
               <div className="form-grid">
-                <div className="full-width" style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                  <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <Image size={16} /> Upload Image
-                  </label>
+                <input type="text" placeholder="Event Title (e.g., Workshop 2024)" value={newEvent.title} onChange={e => setNewEvent({...newEvent, title: e.target.value})} required />
+                <input type="text" placeholder="Date (e.g., March 2024)" value={newEvent.date} onChange={e => setNewEvent({...newEvent, date: e.target.value})} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                  <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Upload Cover Image *</label>
                   <input 
-                    id="gallery-file-input"
+                    id="event-cover-input"
                     type="file" 
                     accept="image/*" 
-                    onChange={(e) => handleGalleryImageUpload(e, false)} 
+                    onChange={(e) => handleEventCoverUpload(e, false)} 
                     style={{ padding: '0.5rem' }} 
                     required
                   />
-                  {newGalleryImage.src && (
-                    <img 
-                      src={newGalleryImage.src} 
-                      alt="Preview" 
-                      style={{ height: '120px', objectFit: 'cover', borderRadius: '8px', border: '1px solid var(--border-color)' }} 
-                    />
+                  {newEvent.coverImage && (
+                    <img src={newEvent.coverImage} alt="Cover Preview" style={{ height: '80px', objectFit: 'cover', borderRadius: '8px' }} />
                   )}
                 </div>
-                <input type="text" placeholder="Caption (e.g., Workshop Day 2024)" value={newGalleryImage.caption} onChange={e => setNewGalleryImage({...newGalleryImage, caption: e.target.value})} />
-                <input type="text" placeholder="Date (e.g., March 2024)" value={newGalleryImage.date} onChange={e => setNewGalleryImage({...newGalleryImage, date: e.target.value})} />
-                <button type="submit" className="btn btn-accent full-width mt-2"><Plus size={18} /> Add Image</button>
+                <button type="submit" className="btn btn-accent mt-2"><Plus size={18} /> Create Event</button>
               </div>
             </form>
 
-            {/* List Existing Gallery Images */}
-            <div className="admin-list gallery-admin-list">
-              {galleryImages.length === 0 && (
-                <p style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '2rem' }}>No gallery images yet. Upload your first image above!</p>
+            {/* List Existing Events */}
+            <div className="admin-list event-admin-list">
+              {events.length === 0 && (
+                <p style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '2rem' }}>No events yet. Create your first event above!</p>
               )}
-              {galleryImages.map(img => (
-                <div key={img.id} className="admin-card gallery-card-admin">
-                  {editingGalleryImage?.id === img.id ? (
-                    <form className="admin-edit-form gallery-edit-form" onSubmit={handleUpdateGalleryImage}>
-                      <div className="gallery-edit-preview">
-                        <img src={editingGalleryImage.src} alt="Preview" className="gallery-admin-thumb" />
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                          <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Replace image:</label>
-                          <input type="file" accept="image/*" onChange={(e) => handleGalleryImageUpload(e, true)} style={{ padding: '0.5rem' }} />
-                        </div>
+              {events.map(ev => (
+                <div key={ev.id} className="admin-card event-card-admin" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                  
+                  {editingEvent?.id === ev.id ? (
+                    <form className="admin-edit-form" onSubmit={handleUpdateEvent} style={{ flexWrap: 'wrap', marginBottom: '1rem' }}>
+                      <input type="text" placeholder="Event Title" value={editingEvent.title} onChange={e => setEditingEvent({...editingEvent, title: e.target.value})} required />
+                      <input type="text" placeholder="Date" value={editingEvent.date} onChange={e => setEditingEvent({...editingEvent, date: e.target.value})} />
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
+                        <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Replace cover image:</label>
+                        <input type="file" accept="image/*" onChange={(e) => handleEventCoverUpload(e, true)} style={{ padding: '0.5rem' }} />
+                        {editingEvent.coverImage && <img src={editingEvent.coverImage} alt="Preview" style={{ height: '60px', objectFit: 'cover', borderRadius: '4px' }} />}
                       </div>
-                      <input type="text" placeholder="Caption" value={editingGalleryImage.caption} onChange={e => setEditingGalleryImage({...editingGalleryImage, caption: e.target.value})} />
-                      <input type="text" placeholder="Date" value={editingGalleryImage.date} onChange={e => setEditingGalleryImage({...editingGalleryImage, date: e.target.value})} />
-                      <div className="action-buttons">
+                      <div className="action-buttons full-width">
                         <button type="submit" className="btn-icon save"><Save size={18} /></button>
-                        <button type="button" className="btn-icon cancel" onClick={() => setEditingGalleryImage(null)}><X size={18} /></button>
+                        <button type="button" className="btn-icon cancel" onClick={() => setEditingEvent(null)}><X size={18} /></button>
                       </div>
                     </form>
                   ) : (
-                    <>
+                    <div className="event-admin-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
                       <div className="card-info" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-                        <img src={img.src} alt={img.caption || 'Gallery'} className="gallery-admin-thumb" />
+                        <img src={ev.coverImage} alt={ev.title} style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '8px' }} />
                         <div>
-                          <h4>{img.caption || 'Untitled'}</h4>
-                          {img.date && <p style={{ fontSize: '0.85rem' }}>{img.date}</p>}
+                          <h4>{ev.title}</h4>
+                          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{ev.date} • {ev.images ? ev.images.length : 0} images</p>
                         </div>
                       </div>
                       <div className="action-buttons">
-                        <button className="btn-icon edit" onClick={() => setEditingGalleryImage(img)}><Edit2 size={18} /></button>
-                        <button className="btn-icon delete" onClick={() => handleDeleteGalleryImage(img.id)}><Trash2 size={18} /></button>
+                        <button className="btn btn-light" style={{ padding: '0.5rem 1rem', fontSize: '0.85rem' }} onClick={() => setManagingImagesForEventId(managingImagesForEventId === ev.id ? null : ev.id)}>
+                          {managingImagesForEventId === ev.id ? 'Close Album' : 'Manage Images'}
+                        </button>
+                        <button className="btn-icon edit" onClick={() => setEditingEvent(ev)}><Edit2 size={18} /></button>
+                        <button className="btn-icon delete" onClick={() => handleDeleteEvent(ev.id)}><Trash2 size={18} /></button>
                       </div>
-                    </>
+                    </div>
                   )}
+
+                  {/* Album Image Management Section */}
+                  {managingImagesForEventId === ev.id && (
+                    <div className="album-management-section" style={{ background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                      <h5 style={{ marginBottom: '1rem', color: '#fff' }}>Upload Images to {ev.title}</h5>
+                      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', alignItems: 'flex-end' }}>
+                        <div style={{ flex: 1 }}>
+                          <input type="text" placeholder="Image Caption (Optional)" value={newImageCaption} onChange={(e) => setNewImageCaption(e.target.value)} style={{ width: '100%', marginBottom: '0.5rem' }} />
+                          <input type="file" accept="image/*" onChange={(e) => handleAddImageToEvent(e, ev.id)} style={{ width: '100%' }} />
+                        </div>
+                      </div>
+
+                      <h5 style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>Album Images</h5>
+                      {(!ev.images || ev.images.length === 0) ? (
+                        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>No images in this album yet.</p>
+                      ) : (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '1rem' }}>
+                          {ev.images.map(img => (
+                            <div key={img.id} style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                              <img src={img.src} alt={img.caption} style={{ width: '100%', height: '100px', objectFit: 'cover', display: 'block' }} />
+                              <button 
+                                onClick={() => handleDeleteImageFromEvent(ev.id, img.id)}
+                                style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(0,0,0,0.7)', border: 'none', color: '#ff4444', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                              {img.caption && <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.8)', padding: '4px 6px', fontSize: '0.7rem', color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{img.caption}</div>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                 </div>
               ))}
             </div>
