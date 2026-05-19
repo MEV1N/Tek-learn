@@ -84,7 +84,7 @@ const Home = () => {
           {/* Call-to-action button for Hero section */}
           <div className="hero-cta">
             {/* Primary exploration button */}
-            <Link to="/course" className="btn btn-outline-light">Explore Courses</Link>
+            <Link to="/course" className="btn btn-outline-light">Explore</Link>
           </div>
         </div>
       </section>
