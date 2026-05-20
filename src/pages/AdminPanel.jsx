@@ -12,12 +12,26 @@ const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState('banners'); // 'banners' | 'courses' | 'gallery'
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
+  const [popupTimeout, setPopupTimeout] = useState(null);
+
+  const triggerPopup = (message, type = 'success') => {
+    if (popupTimeout) {
+      clearTimeout(popupTimeout);
+    }
+    setPopup({ show: true, message, type });
+    const timer = setTimeout(() => {
+      setPopup(prev => ({ ...prev, show: false }));
+    }, type === 'error' ? 6000 : 4000);
+    setPopupTimeout(timer);
+  };
+
   const handleLogin = (e) => {
     e.preventDefault();
     if (passwordInput === 'teklearnadmin') {
       setIsAuthenticated(true);
     } else {
-      alert('Incorrect password!');
+      triggerPopup('Incorrect password!', 'error');
     }
   };
 
@@ -135,7 +149,7 @@ const AdminPanel = () => {
     
     // Convert to base64 for quick preview (or use URL.createObjectURL)
     // We will upload it directly now
-    alert('Uploading image, please wait...');
+    triggerPopup('Uploading image, please wait...', 'info');
     
     // Wait, let's use the cloudinary upload utility for this instead!
     const formData = new FormData();
@@ -157,10 +171,10 @@ const AdminPanel = () => {
       } else {
         setNewEvent({ ...newEvent, coverImage: data.url });
       }
-      alert('Image uploaded successfully!');
+      triggerPopup('Image uploaded successfully!', 'success');
     } catch (err) {
       console.error(err);
-      alert(`Failed to upload image: ${err.message}`);
+      triggerPopup(`Failed to upload image: ${err.message}`, 'error');
     }
   };
 
@@ -182,10 +196,10 @@ const AdminPanel = () => {
       const fileInput = document.getElementById('event-cover-input');
       if (fileInput) fileInput.value = '';
       await refreshData();
-      alert('Event created successfully!');
+      triggerPopup('Event created successfully!', 'success');
     } catch (err) { 
       console.error(err); 
-      alert(`Failed to create event: ${err.message}`);
+      triggerPopup(`Failed to create event: ${err.message}`, 'error');
     } finally { 
       setIsSubmitting(false); 
     }
@@ -248,10 +262,10 @@ const AdminPanel = () => {
       setNewImageCaption('');
       e.target.value = '';
       await refreshData();
-      alert('Image added to album successfully!');
+      triggerPopup('Image added to album successfully!', 'success');
     } catch (err) {
       console.error(err);
-      alert(`Failed to add image: ${err.message}`);
+      triggerPopup(`Failed to add image: ${err.message}`, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -530,6 +544,15 @@ const AdminPanel = () => {
         </>
         )}
       </div>
+
+      {popup.show && (
+        <div className={`popup-alert ${popup.type}`}>
+          <span>{popup.message}</span>
+          <button className="popup-alert-close" onClick={() => setPopup(prev => ({ ...prev, show: false }))}>
+            <X size={16} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };
