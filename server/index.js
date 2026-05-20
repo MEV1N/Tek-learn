@@ -51,6 +51,26 @@ const initDb = async () => {
       );
       console.log('Default admin password initialized successfully');
     }
+
+    // Initialize admin table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS admin (
+        id SERIAL PRIMARY KEY,
+        username VARCHAR(50) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL
+      );
+    `);
+
+    // Seed default admin user if empty
+    const adminCheck = await pool.query("SELECT COUNT(*) FROM admin");
+    if (parseInt(adminCheck.rows[0].count) === 0) {
+      const defaultHash = crypto.createHash('sha256').update('teklearnadmin').digest('hex');
+      await pool.query(
+        "INSERT INTO admin (username, password) VALUES ('admin', $1)",
+        [defaultHash]
+      );
+      console.log('Default admin user initialized successfully');
+    }
   } catch (err) {
     console.error('Error initializing admin settings schema:', err);
   }
@@ -282,27 +302,29 @@ app.delete('/api/events/images/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
 // --- Admin Authentication & Settings ---
 
 app.post('/api/admin/login', async (req, res) => {
-  const { password } = req.body;
-  if (!password) {
-    return res.status(400).json({ error: 'Password is required' });
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password are required' });
   }
 
   try {
     const hashed = crypto.createHash('sha256').update(password).digest('hex');
-    const result = await pool.query("SELECT value FROM admin_settings WHERE key = 'admin_password'");
+    const result = await pool.query("SELECT * FROM admin WHERE username = $1", [username]);
     
     if (result.rows.length === 0) {
-      return res.status(500).json({ error: 'Admin settings not initialized' });
+      return res.status(401).json({ error: 'Incorrect username or password' });
     }
 
-    const storedHash = result.rows[0].value;
+    const storedHash = result.rows[0].password;
     if (hashed === storedHash) {
-      res.json({ success: true });
+      res.json({ success: true, username });
     } else {
-      res.status(401).json({ error: 'Incorrect password' });
+      res.status(401).json({ error: 'Incorrect username or password' });
     }
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -310,31 +332,109 @@ app.post('/api/admin/login', async (req, res) => {
 });
 
 app.post('/api/admin/change-password', async (req, res) => {
-  const { currentPassword, newPassword } = req.body;
-  if (!currentPassword || !newPassword) {
-    return res.status(400).json({ error: 'Current password and new password are required' });
+  const { username, currentPassword, newPassword } = req.body;
+  if (!username || !currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'Username, current password, and new password are required' });
   }
 
   try {
     const currentHash = crypto.createHash('sha256').update(currentPassword).digest('hex');
-    const result = await pool.query("SELECT value FROM admin_settings WHERE key = 'admin_password'");
+    const result = await pool.query("SELECT password FROM admin WHERE username = $1", [username]);
     
     if (result.rows.length === 0) {
-      return res.status(500).json({ error: 'Admin settings not initialized' });
+      return res.status(404).json({ error: 'Admin user not found' });
     }
 
-    const storedHash = result.rows[0].value;
+    const storedHash = result.rows[0].password;
     if (currentHash !== storedHash) {
       return res.status(401).json({ error: 'Incorrect current password' });
     }
 
     const newHash = crypto.createHash('sha256').update(newPassword).digest('hex');
     await pool.query(
-      "UPDATE admin_settings SET value = $1 WHERE key = 'admin_password'",
-      [newHash]
+      "UPDATE admin SET password = $1 WHERE username = $2",
+      [newHash, username]
     );
 
     res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get list of admins (excluding password hashes)
+app.get('/api/admins', async (req, res) => {
+  try {
+    const result = await pool.query("SELECT id, username FROM admin ORDER BY id ASC");
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Create a new admin account
+app.post('/api/admins', async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password are required' });
+  }
+
+  try {
+    // Check if username already exists
+    const checkUser = await pool.query("SELECT * FROM admin WHERE username = $1", [username]);
+    if (checkUser.rows.length > 0) {
+      return res.status(400).json({ error: 'Username already exists' });
+    }
+
+    const hashed = crypto.createHash('sha256').update(password).digest('hex');
+    const result = await pool.query(
+      "INSERT INTO admin (username, password) VALUES ($1, $2) RETURNING id, username",
+      [username, hashed]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Update the password of a specific admin (by admin list view)
+app.put('/api/admins/:id/password', async (req, res) => {
+  const { id } = req.params;
+  const { newPassword } = req.body;
+  if (!newPassword) {
+    return res.status(400).json({ error: 'New password is required' });
+  }
+
+  try {
+    const hashed = crypto.createHash('sha256').update(newPassword).digest('hex');
+    const result = await pool.query(
+      "UPDATE admin SET password = $1 WHERE id = $2 RETURNING id, username",
+      [hashed, id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Admin user not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete an admin account
+app.delete('/api/admins/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Ensure we don't delete the last admin
+    const countRes = await pool.query("SELECT COUNT(*) FROM admin");
+    if (parseInt(countRes.rows[0].count) <= 1) {
+      return res.status(400).json({ error: 'Cannot delete the last admin account' });
+    }
+
+    const result = await pool.query("DELETE FROM admin WHERE id = $1 RETURNING id, username", [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Admin user not found' });
+    }
+    res.json({ message: 'Admin deleted successfully', deleted: result.rows[0] });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

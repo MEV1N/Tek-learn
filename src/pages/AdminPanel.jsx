@@ -5,15 +5,23 @@ import './AdminPanel.css';
 
 const AdminPanel = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
+  const [loggedInUser, setLoggedInUser] = useState('');
   
   const { banners, courses, events, refreshData } = useData();
   
-  const [activeTab, setActiveTab] = useState('banners'); // 'banners' | 'courses' | 'gallery'
+  const [activeTab, setActiveTab] = useState('banners'); // 'banners' | 'courses' | 'gallery' | 'admins' | 'settings'
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [popup, setPopup] = useState({ show: false, message: '', type: 'success' });
   const [popupTimeout, setPopupTimeout] = useState(null);
+
+  // --- Admin User Management State ---
+  const [adminsList, setAdminsList] = useState([]);
+  const [newAdminState, setNewAdminState] = useState({ username: '', password: '', confirmPassword: '' });
+  const [editingAdminPasswordId, setEditingAdminPasswordId] = useState(null);
+  const [adminNewPassword, setAdminNewPassword] = useState('');
 
   const triggerPopup = (message, type = 'success') => {
     if (popupTimeout) {
@@ -34,21 +42,23 @@ const AdminPanel = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!passwordInput || isSubmitting) return;
+    if (!usernameInput || !passwordInput || isSubmitting) return;
     setIsSubmitting(true);
     try {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: passwordInput })
+        body: JSON.stringify({ username: usernameInput, password: passwordInput })
       });
       
       if (res.ok) {
+        const data = await res.json();
         setIsAuthenticated(true);
+        setLoggedInUser(data.username || usernameInput);
         triggerPopup('Logged in successfully!');
       } else {
         const errorData = await res.json().catch(() => ({}));
-        triggerPopup(errorData.error || 'Incorrect password!', 'error');
+        triggerPopup(errorData.error || 'Incorrect username or password!', 'error');
       }
     } catch (err) {
       triggerPopup('Server connection error. Please try again.', 'error');
@@ -72,6 +82,7 @@ const AdminPanel = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          username: loggedInUser,
           currentPassword: changePasswordState.currentPassword,
           newPassword: changePasswordState.newPassword
         })
@@ -92,6 +103,115 @@ const AdminPanel = () => {
       triggerPopup('Server connection error. Please try again.', 'error');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const fetchAdmins = async () => {
+    try {
+      const res = await fetch('/api/admins');
+      if (res.ok) {
+        const data = await res.json();
+        setAdminsList(data);
+      }
+    } catch (err) {
+      console.error('Error fetching admins:', err);
+    }
+  };
+
+  const handleAddAdmin = async (e) => {
+    e.preventDefault();
+    if (!newAdminState.username || !newAdminState.password || isSubmitting) return;
+
+    if (newAdminState.password !== newAdminState.confirmPassword) {
+      triggerPopup('Passwords do not match!', 'error');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/admins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: newAdminState.username,
+          password: newAdminState.password
+        })
+      });
+
+      if (res.ok) {
+        triggerPopup('Admin created successfully!', 'success');
+        setNewAdminState({ username: '', password: '', confirmPassword: '' });
+        await fetchAdmins();
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        triggerPopup(errorData.error || 'Failed to create admin.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      triggerPopup('Server connection error. Please try again.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteAdmin = async (id, usernameToDelete) => {
+    if (usernameToDelete === loggedInUser) {
+      triggerPopup('You cannot delete your own logged-in admin account!', 'error');
+      return;
+    }
+
+    if (isSubmitting || !confirm(`Delete admin user "${usernameToDelete}"?`)) return;
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`/api/admins/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        triggerPopup('Admin deleted successfully!', 'success');
+        await fetchAdmins();
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        triggerPopup(errorData.error || 'Failed to delete admin.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      triggerPopup('Server connection error. Please try again.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdateAdminPassword = async (e, id) => {
+    e.preventDefault();
+    if (!adminNewPassword || isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(`/api/admins/${id}/password`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newPassword: adminNewPassword })
+      });
+
+      if (res.ok) {
+        triggerPopup('Admin password updated successfully!', 'success');
+        setEditingAdminPasswordId(null);
+        setAdminNewPassword('');
+        await fetchAdmins();
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        triggerPopup(errorData.error || 'Failed to update password.', 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      triggerPopup('Server connection error. Please try again.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleTabChange = (tabName) => {
+    setActiveTab(tabName);
+    if (tabName === 'admins') {
+      fetchAdmins();
     }
   };
 
@@ -351,6 +471,14 @@ const AdminPanel = () => {
             <h2 style={{ marginBottom: '1.5rem' }}>Login Required</h2>
             <form onSubmit={handleLogin}>
               <input 
+                type="text" 
+                placeholder="Enter admin username" 
+                value={usernameInput} 
+                onChange={(e) => setUsernameInput(e.target.value)} 
+                style={{ width: '100%', padding: '0.8rem 1rem', background: '#1a1a1a', border: '1px solid var(--border-color)', color: '#fff', borderRadius: '8px', marginBottom: '1rem' }}
+                required 
+              />
+              <input 
                 type="password" 
                 placeholder="Enter admin password" 
                 value={passwordInput} 
@@ -364,10 +492,11 @@ const AdminPanel = () => {
         ) : (
           <>
             <div className="admin-tabs">
-              <button className={`admin-tab ${activeTab === 'banners' ? 'active' : ''}`} onClick={() => setActiveTab('banners')}>Manage Banners</button>
-              <button className={`admin-tab ${activeTab === 'courses' ? 'active' : ''}`} onClick={() => setActiveTab('courses')}>Manage Courses</button>
-              <button className={`admin-tab ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => setActiveTab('gallery')}>Manage Events</button>
-              <button className={`admin-tab ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>Settings</button>
+              <button className={`admin-tab ${activeTab === 'banners' ? 'active' : ''}`} onClick={() => handleTabChange('banners')}>Manage Banners</button>
+              <button className={`admin-tab ${activeTab === 'courses' ? 'active' : ''}`} onClick={() => handleTabChange('courses')}>Manage Courses</button>
+              <button className={`admin-tab ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => handleTabChange('gallery')}>Manage Events</button>
+              <button className={`admin-tab ${activeTab === 'admins' ? 'active' : ''}`} onClick={() => handleTabChange('admins')}>Manage Admins</button>
+              <button className={`admin-tab ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => handleTabChange('settings')}>Settings</button>
             </div>
 
         {activeTab === 'banners' && (
@@ -599,6 +728,104 @@ const AdminPanel = () => {
 
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'admins' && (
+          <div className="admin-section">
+            <h2>Admin Users</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+              Add, delete, or update passwords for admin accounts.
+            </p>
+            
+            {/* Add New Admin Form */}
+            <form className="admin-form" onSubmit={handleAddAdmin} style={{ marginBottom: '3rem' }}>
+              <h3>Add New Admin</h3>
+              <div className="form-row" style={{ flexWrap: 'wrap', gap: '1rem' }}>
+                <input 
+                  type="text" 
+                  placeholder="Username" 
+                  value={newAdminState.username} 
+                  onChange={e => setNewAdminState({...newAdminState, username: e.target.value})} 
+                  required 
+                />
+                <input 
+                  type="password" 
+                  placeholder="Password" 
+                  value={newAdminState.password} 
+                  onChange={e => setNewAdminState({...newAdminState, password: e.target.value})} 
+                  required 
+                />
+                <input 
+                  type="password" 
+                  placeholder="Confirm Password" 
+                  value={newAdminState.confirmPassword} 
+                  onChange={e => setNewAdminState({...newAdminState, confirmPassword: e.target.value})} 
+                  required 
+                />
+                <button type="submit" className="btn btn-accent"><Plus size={18} /> Add Admin</button>
+              </div>
+            </form>
+
+            {/* List Existing Admins */}
+            <div className="admin-list">
+              <h3>Existing Admins</h3>
+              {adminsList.length === 0 ? (
+                <p style={{ color: 'var(--text-secondary)' }}>No admins found.</p>
+              ) : (
+                adminsList.map(admin => (
+                  <div key={admin.id} className="admin-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.2rem', margin: '0.8rem 0' }}>
+                    <div className="card-info" style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                      <h4 style={{ margin: 0, fontSize: '1.1rem' }}>
+                        {admin.username}
+                        {admin.username === loggedInUser && (
+                          <span className="badge" style={{ marginLeft: '10px', background: 'var(--accent-color)', color: '#000', fontSize: '0.75rem', padding: '2px 6px', borderRadius: '4px' }}>
+                            You
+                          </span>
+                        )}
+                      </h4>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                      {editingAdminPasswordId === admin.id ? (
+                        <form onSubmit={(e) => handleUpdateAdminPassword(e, admin.id)} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <input 
+                            type="password" 
+                            placeholder="New Password" 
+                            value={adminNewPassword} 
+                            onChange={e => setAdminNewPassword(e.target.value)} 
+                            required 
+                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.9rem', width: '160px' }}
+                          />
+                          <button type="submit" className="btn-icon save" title="Save password"><Save size={18} /></button>
+                          <button type="button" className="btn-icon cancel" onClick={() => { setEditingAdminPasswordId(null); setAdminNewPassword(''); }} title="Cancel"><X size={18} /></button>
+                        </form>
+                      ) : (
+                        <>
+                          <button 
+                            className="btn btn-light" 
+                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                            onClick={() => { setEditingAdminPasswordId(admin.id); setAdminNewPassword(''); }}
+                          >
+                            <Edit2 size={14} /> Update Password
+                          </button>
+                          {admin.username !== loggedInUser && (
+                            <button 
+                              type="button"
+                              className="btn-icon delete" 
+                              title="Delete admin"
+                              onClick={() => handleDeleteAdmin(admin.id, admin.username)}
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
