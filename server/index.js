@@ -21,6 +21,8 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+const crypto = require('crypto');
+
 // Initialize Postgres connection
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -29,9 +31,37 @@ const pool = new Pool({
   }
 });
 
+// Initialize database schema and admin settings
+const initDb = async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS admin_settings (
+        key VARCHAR(50) PRIMARY KEY,
+        value TEXT NOT NULL
+      );
+    `);
+    
+    // Check if admin_password exists
+    const res = await pool.query("SELECT * FROM admin_settings WHERE key = 'admin_password'");
+    if (res.rows.length === 0) {
+      const defaultHash = crypto.createHash('sha256').update('teklearnadmin').digest('hex');
+      await pool.query(
+        "INSERT INTO admin_settings (key, value) VALUES ('admin_password', $1)",
+        [defaultHash]
+      );
+      console.log('Default admin password initialized successfully');
+    }
+  } catch (err) {
+    console.error('Error initializing admin settings schema:', err);
+  }
+};
+
 // Test DB Connection
 pool.connect()
-  .then(() => console.log('Connected to PostgreSQL (Neon)'))
+  .then(() => {
+    console.log('Connected to PostgreSQL (Neon)');
+    initDb();
+  })
   .catch(err => console.error('Connection error', err.stack));
 
 // --- Banners ---
@@ -249,6 +279,62 @@ app.delete('/api/events/images/:id', async (req, res) => {
   try {
     await pool.query('DELETE FROM event_images WHERE id = $1', [imageId]);
     res.json({ message: 'Image deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+// --- Admin Authentication & Settings ---
+
+app.post('/api/admin/login', async (req, res) => {
+  const { password } = req.body;
+  if (!password) {
+    return res.status(400).json({ error: 'Password is required' });
+  }
+
+  try {
+    const hashed = crypto.createHash('sha256').update(password).digest('hex');
+    const result = await pool.query("SELECT value FROM admin_settings WHERE key = 'admin_password'");
+    
+    if (result.rows.length === 0) {
+      return res.status(500).json({ error: 'Admin settings not initialized' });
+    }
+
+    const storedHash = result.rows[0].value;
+    if (hashed === storedHash) {
+      res.json({ success: true });
+    } else {
+      res.status(401).json({ error: 'Incorrect password' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/change-password', async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'Current password and new password are required' });
+  }
+
+  try {
+    const currentHash = crypto.createHash('sha256').update(currentPassword).digest('hex');
+    const result = await pool.query("SELECT value FROM admin_settings WHERE key = 'admin_password'");
+    
+    if (result.rows.length === 0) {
+      return res.status(500).json({ error: 'Admin settings not initialized' });
+    }
+
+    const storedHash = result.rows[0].value;
+    if (currentHash !== storedHash) {
+      return res.status(401).json({ error: 'Incorrect current password' });
+    }
+
+    const newHash = crypto.createHash('sha256').update(newPassword).digest('hex');
+    await pool.query(
+      "UPDATE admin_settings SET value = $1 WHERE key = 'admin_password'",
+      [newHash]
+    );
+
+    res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

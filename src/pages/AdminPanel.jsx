@@ -26,12 +26,72 @@ const AdminPanel = () => {
     setPopupTimeout(timer);
   };
 
-  const handleLogin = (e) => {
+  const [changePasswordState, setChangePasswordState] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (passwordInput === 'teklearnadmin') {
-      setIsAuthenticated(true);
-    } else {
-      triggerPopup('Incorrect password!', 'error');
+    if (!passwordInput || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: passwordInput })
+      });
+      
+      if (res.ok) {
+        setIsAuthenticated(true);
+        triggerPopup('Logged in successfully!');
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        triggerPopup(errorData.error || 'Incorrect password!', 'error');
+      }
+    } catch (err) {
+      triggerPopup('Server connection error. Please try again.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    if (changePasswordState.newPassword !== changePasswordState.confirmPassword) {
+      triggerPopup('New passwords do not match!', 'error');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/admin/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: changePasswordState.currentPassword,
+          newPassword: changePasswordState.newPassword
+        })
+      });
+
+      if (res.ok) {
+        triggerPopup('Password changed successfully!');
+        setChangePasswordState({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: ''
+        });
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        triggerPopup(errorData.error || 'Failed to change password.', 'error');
+      }
+    } catch (err) {
+      triggerPopup('Server connection error. Please try again.', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -304,10 +364,11 @@ const AdminPanel = () => {
         ) : (
           <>
             <div className="admin-tabs">
-          <button className={`admin-tab ${activeTab === 'banners' ? 'active' : ''}`} onClick={() => setActiveTab('banners')}>Manage Banners</button>
-          <button className={`admin-tab ${activeTab === 'courses' ? 'active' : ''}`} onClick={() => setActiveTab('courses')}>Manage Courses</button>
-          <button className={`admin-tab ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => setActiveTab('gallery')}>Manage Events</button>
-        </div>
+              <button className={`admin-tab ${activeTab === 'banners' ? 'active' : ''}`} onClick={() => setActiveTab('banners')}>Manage Banners</button>
+              <button className={`admin-tab ${activeTab === 'courses' ? 'active' : ''}`} onClick={() => setActiveTab('courses')}>Manage Courses</button>
+              <button className={`admin-tab ${activeTab === 'gallery' ? 'active' : ''}`} onClick={() => setActiveTab('gallery')}>Manage Events</button>
+              <button className={`admin-tab ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>Settings</button>
+            </div>
 
         {activeTab === 'banners' && (
           <div className="admin-section">
@@ -539,6 +600,53 @@ const AdminPanel = () => {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div className="admin-section">
+            <h2>Settings</h2>
+            <form className="admin-form change-password-form" onSubmit={handleChangePassword} style={{ maxWidth: '400px', margin: '0 auto', background: '#111', padding: '2rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+              <h3 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>Change Admin Password</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', textAlign: 'left' }}>
+                  <label style={{ fontSize: '0.9rem', color: '#ccc' }}>Current Password</label>
+                  <input
+                    type="password"
+                    placeholder="Enter current password"
+                    value={changePasswordState.currentPassword}
+                    onChange={e => setChangePasswordState({ ...changePasswordState, currentPassword: e.target.value })}
+                    required
+                    style={{ padding: '0.8rem 1rem', background: '#1a1a1a', border: '1px solid var(--border-color)', color: '#fff', borderRadius: '8px' }}
+                  />
+                </div>
+                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', textAlign: 'left' }}>
+                  <label style={{ fontSize: '0.9rem', color: '#ccc' }}>New Password</label>
+                  <input
+                    type="password"
+                    placeholder="Enter new password"
+                    value={changePasswordState.newPassword}
+                    onChange={e => setChangePasswordState({ ...changePasswordState, newPassword: e.target.value })}
+                    required
+                    style={{ padding: '0.8rem 1rem', background: '#1a1a1a', border: '1px solid var(--border-color)', color: '#fff', borderRadius: '8px' }}
+                  />
+                </div>
+                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', textAlign: 'left' }}>
+                  <label style={{ fontSize: '0.9rem', color: '#ccc' }}>Confirm New Password</label>
+                  <input
+                    type="password"
+                    placeholder="Confirm new password"
+                    value={changePasswordState.confirmPassword}
+                    onChange={e => setChangePasswordState({ ...changePasswordState, confirmPassword: e.target.value })}
+                    required
+                    style={{ padding: '0.8rem 1rem', background: '#1a1a1a', border: '1px solid var(--border-color)', color: '#fff', borderRadius: '8px' }}
+                  />
+                </div>
+                <button type="submit" className="btn btn-accent" disabled={isSubmitting} style={{ marginTop: '0.5rem', width: '100%' }}>
+                  {isSubmitting ? 'Updating...' : 'Update Password'}
+                </button>
+              </div>
+            </form>
           </div>
         )}
         </>
