@@ -19,6 +19,7 @@ const port = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Initialize Postgres connection
 const pool = new Pool({
@@ -269,7 +270,7 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
     })
     .catch((error) => {
       console.error('Cloudinary Upload Error:', error);
-      res.status(500).json({ error: 'Failed to upload to Cloudinary' });
+      res.status(500).json({ error: error.message || 'Failed to upload to Cloudinary' });
     });
 });
 if (require.main === module) {
