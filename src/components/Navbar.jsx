@@ -39,7 +39,7 @@ const Navbar = () => {
             </a>
           </li>
           <li><Link to="/coming-soon" onClick={() => setIsOpen(false)}>Portfolio</Link></li>
-          <li><Link to="/coming-soon" className="btn btn-light nav-btn" onClick={() => setIsOpen(false)}>Login</Link></li>
+          <li><a href="https://www.tek-learn.com/login" className="btn btn-light nav-btn" onClick={() => setIsOpen(false)}>Login</a></li>
         </ul>
       </div>
     </nav>
