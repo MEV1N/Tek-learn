@@ -86,20 +86,38 @@ app.delete('/api/banners/:id', async (req, res) => {
 app.get('/api/courses', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM courses ORDER BY id ASC');
-    res.json(result.rows);
+    const courses = result.rows.map(row => ({
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      price: row.price,
+      duration: row.duration,
+      iconName: row.iconname,
+      customIcon: row.customicon
+    }));
+    res.json(courses);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 app.post('/api/courses', async (req, res) => {
-  const { title, description, price, duration, iconName } = req.body;
+  const { title, description, price, duration, iconName, customIcon } = req.body;
   try {
     const result = await pool.query(
-      'INSERT INTO courses (title, description, price, duration, iconName) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [title, description, price, duration, iconName]
+      'INSERT INTO courses (title, description, price, duration, iconName, customIcon) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [title, description, price, duration, iconName, customIcon]
     );
-    res.status(201).json(result.rows[0]);
+    const row = result.rows[0];
+    res.status(201).json({
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      price: row.price,
+      duration: row.duration,
+      iconName: row.iconname,
+      customIcon: row.customicon
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -107,13 +125,22 @@ app.post('/api/courses', async (req, res) => {
 
 app.put('/api/courses/:id', async (req, res) => {
   const { id } = req.params;
-  const { title, description, price, duration, iconName } = req.body;
+  const { title, description, price, duration, iconName, customIcon } = req.body;
   try {
     const result = await pool.query(
-      'UPDATE courses SET title = $1, description = $2, price = $3, duration = $4, iconName = $5 WHERE id = $6 RETURNING *',
-      [title, description, price, duration, iconName, id]
+      'UPDATE courses SET title = $1, description = $2, price = $3, duration = $4, iconName = $5, customIcon = $6 WHERE id = $7 RETURNING *',
+      [title, description, price, duration, iconName, customIcon, id]
     );
-    res.json(result.rows[0]);
+    const row = result.rows[0];
+    res.json({
+      id: row.id,
+      title: row.title,
+      description: row.description,
+      price: row.price,
+      duration: row.duration,
+      iconName: row.iconname,
+      customIcon: row.customicon
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -139,7 +166,10 @@ app.get('/api/events', async (req, res) => {
     // Group images by event
     const events = eventsResult.rows.map(event => {
       return {
-        ...event,
+        id: event.id,
+        title: event.title,
+        date: event.date,
+        coverImage: event.coverimage,
         images: imagesResult.rows.filter(img => img.event_id === event.id)
       };
     });
@@ -157,7 +187,13 @@ app.post('/api/events', async (req, res) => {
       'INSERT INTO events (title, date, coverImage) VALUES ($1, $2, $3) RETURNING *',
       [title, date, coverImage]
     );
-    res.status(201).json(result.rows[0]);
+    const row = result.rows[0];
+    res.status(201).json({
+      id: row.id,
+      title: row.title,
+      date: row.date,
+      coverImage: row.coverimage
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -171,7 +207,13 @@ app.put('/api/events/:id', async (req, res) => {
       'UPDATE events SET title = $1, date = $2, coverImage = $3 WHERE id = $4 RETURNING *',
       [title, date, coverImage, id]
     );
-    res.json(result.rows[0]);
+    const row = result.rows[0];
+    res.json({
+      id: row.id,
+      title: row.title,
+      date: row.date,
+      coverImage: row.coverimage
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -12,7 +12,8 @@ CREATE TABLE IF NOT EXISTS courses (
   description TEXT,
   price TEXT,
   duration TEXT,
-  iconName TEXT
+  iconName TEXT,
+  customIcon TEXT
 );
 
 CREATE TABLE IF NOT EXISTS events (

@@ -143,7 +143,14 @@ const AdminPanel = () => {
     
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server responded with status ${res.status}`);
+      }
       const data = await res.json();
+      if (!data.url) {
+        throw new Error('Image URL was not returned by server');
+      }
       
       if (isEditing) {
         setEditingEvent({ ...editingEvent, coverImage: data.url });
@@ -153,7 +160,7 @@ const AdminPanel = () => {
       alert('Image uploaded successfully!');
     } catch (err) {
       console.error(err);
-      alert('Failed to upload image');
+      alert(`Failed to upload image: ${err.message}`);
     }
   };
 
@@ -162,16 +169,26 @@ const AdminPanel = () => {
     if (!newEvent.title || !newEvent.coverImage || isSubmitting) return;
     setIsSubmitting(true);
     try {
-      await fetch('/api/events', {
+      const res = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newEvent)
       });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server responded with status ${res.status}`);
+      }
       setNewEvent({ title: '', date: '', coverImage: '', images: [] });
       const fileInput = document.getElementById('event-cover-input');
       if (fileInput) fileInput.value = '';
       await refreshData();
-    } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
+      alert('Event created successfully!');
+    } catch (err) { 
+      console.error(err); 
+      alert(`Failed to create event: ${err.message}`);
+    } finally { 
+      setIsSubmitting(false); 
+    }
   };
 
   const handleDeleteEvent = async (id) => {
@@ -208,21 +225,33 @@ const AdminPanel = () => {
       const formData = new FormData();
       formData.append('file', file);
       const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData });
-      const { url } = await uploadRes.json();
+      if (!uploadRes.ok) {
+        const errorData = await uploadRes.json().catch(() => ({}));
+        throw new Error(errorData.error || `Upload responded with status ${uploadRes.status}`);
+      }
+      const data = await uploadRes.json();
+      if (!data.url) {
+        throw new Error('Image URL was not returned by server');
+      }
       
       // 2. Add to event_images via backend
-      await fetch(`/api/events/${eventId}/images`, {
+      const res = await fetch(`/api/events/${eventId}/images`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ src: url })
+        body: JSON.stringify({ src: data.url })
       });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `Saving responded with status ${res.status}`);
+      }
       
       setNewImageCaption('');
       e.target.value = '';
       await refreshData();
+      alert('Image added to album successfully!');
     } catch (err) {
       console.error(err);
-      alert('Failed to upload image');
+      alert(`Failed to add image: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
