@@ -45,7 +45,13 @@ const Home = () => {
 
 
   useEffect(() => {
-    const topCoursesLength = Math.min(courses.length, 3);
+    if (courses.length > 0 && activeCourse >= courses.length) {
+      setActiveCourse(0);
+    }
+  }, [courses, activeCourse]);
+
+  useEffect(() => {
+    const topCoursesLength = courses.length;
     if (topCoursesLength === 0) return;
     const interval = setInterval(() => {
       setActiveCourse((prev) => (prev + 1) % topCoursesLength);
@@ -254,18 +260,34 @@ const Home = () => {
           
           {/* Container holding absolute-positioned coverflow items */}
           <div className="coverflow-container">
-            {courses.slice(0, 3).map((course, idx) => {
+            {courses.map((course, idx) => {
               let positionClass = 'hidden';
-              if (idx === activeCourse) positionClass = 'active';
-              else if (idx === activeCourse - 1) positionClass = 'prev';
-              else if (idx === activeCourse + 1) positionClass = 'next';
+              if (idx === activeCourse) {
+                positionClass = 'active';
+              } else if (courses.length > 2) {
+                if (idx === (activeCourse - 1 + courses.length) % courses.length) {
+                  positionClass = 'prev';
+                } else if (idx === (activeCourse + 1) % courses.length) {
+                  positionClass = 'next';
+                }
+              } else if (courses.length === 2) {
+                if (idx === (activeCourse + 1) % 2) {
+                  positionClass = activeCourse === 0 ? 'next' : 'prev';
+                }
+              }
               
               return (
                 <div 
-                  key={idx} 
+                  key={course.id || idx} 
                   className={`coverflow-item ${positionClass}`}
                   onClick={() => {
-                    if(idx === activeCourse - 1 || idx === activeCourse + 1) setActiveCourse(idx);
+                    const prevIdx = (activeCourse - 1 + courses.length) % courses.length;
+                    const nextIdx = (activeCourse + 1) % courses.length;
+                    if (courses.length > 2 && (idx === prevIdx || idx === nextIdx)) {
+                      setActiveCourse(idx);
+                    } else if (courses.length === 2 && idx !== activeCourse) {
+                      setActiveCourse(idx);
+                    }
                   }}
                 >
                   <CourseCard 
