@@ -1,4 +1,5 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
@@ -229,7 +230,10 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
       res.status(500).json({ error: 'Failed to upload to Cloudinary' });
     });
 });
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+}
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+module.exports = app;
