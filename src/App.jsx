@@ -11,6 +11,7 @@ import AdminPanel from './pages/AdminPanel';
 import ComingSoon from './pages/ComingSoon';
 import Gallery from './pages/Gallery';
 import { DataProvider } from './context/DataContext';
+import ScrollToTop from './components/ScrollToTop';
 import './App.css';
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
   return (
     <DataProvider>
       <Router>
+        <ScrollToTop />
         <div className="app-container">
           {/* Global Glow Cursor Effect */}
           <div className="cursor-glow" ref={cursorRef} />
