@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS banners (
   title TEXT NOT NULL,
   highlight TEXT,
   subtitle TEXT,
-  link TEXT
+  link TEXT,
+  image_url TEXT
 );
 
 CREATE TABLE IF NOT EXISTS courses (

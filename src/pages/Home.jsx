@@ -127,8 +127,19 @@ const Home = () => {
           >
             {banners.length > 0 && banners[bannerIndex] && (
               <>
-                <h2><span>{banners[bannerIndex].highlight}</span> {banners[bannerIndex].title}</h2>
-                <p>{banners[bannerIndex].subtitle}</p>
+                {banners[bannerIndex].image_url && (
+                  <div className="banner-image-container">
+                    <img 
+                      src={banners[bannerIndex].image_url} 
+                      alt={banners[bannerIndex].title}
+                      className="banner-image"
+                    />
+                  </div>
+                )}
+                <div className="banner-text">
+                  <h2><span>{banners[bannerIndex].highlight}</span> {banners[bannerIndex].title}</h2>
+                  <p>{banners[bannerIndex].subtitle}</p>
+                </div>
               </>
             )}
           </div>

@@ -95,30 +95,84 @@ app.get('/api/banners', async (req, res) => {
   }
 });
 
-app.post('/api/banners', async (req, res) => {
+app.post('/api/banners', upload.single('image'), async (req, res) => {
   const { title, highlight, subtitle, link } = req.body;
-  try {
-    const result = await pool.query(
-      'INSERT INTO banners (title, highlight, subtitle, link) VALUES ($1, $2, $3, $4) RETURNING *',
-      [title, highlight, subtitle, link]
-    );
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  let imageUrl = null;
+
+  if (req.file) {
+    try {
+      const uploadResult = await cloudinary.uploader.upload_stream(
+        { resource_type: 'auto' },
+        async (error, result) => {
+          if (error) {
+            return res.status(500).json({ error: 'Image upload failed' });
+          }
+          try {
+            imageUrl = result.secure_url;
+            const dbResult = await pool.query(
+              'INSERT INTO banners (title, highlight, subtitle, link, image_url) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+              [title, highlight, subtitle, link, imageUrl]
+            );
+            res.status(201).json(dbResult.rows[0]);
+          } catch (err) {
+            res.status(500).json({ error: err.message });
+          }
+        }
+      ).end(req.file.buffer);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  } else {
+    try {
+      const result = await pool.query(
+        'INSERT INTO banners (title, highlight, subtitle, link, image_url) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [title, highlight, subtitle, link, imageUrl]
+      );
+      res.status(201).json(result.rows[0]);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
   }
 });
 
-app.put('/api/banners/:id', async (req, res) => {
+app.put('/api/banners/:id', upload.single('image'), async (req, res) => {
   const { id } = req.params;
-  const { title, highlight, subtitle, link } = req.body;
-  try {
-    const result = await pool.query(
-      'UPDATE banners SET title = $1, highlight = $2, subtitle = $3, link = $4 WHERE id = $5 RETURNING *',
-      [title, highlight, subtitle, link, id]
-    );
-    res.json(result.rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  const { title, highlight, subtitle, link, image_url } = req.body;
+  let imageUrl = image_url;
+
+  if (req.file) {
+    try {
+      const uploadResult = await cloudinary.uploader.upload_stream(
+        { resource_type: 'auto' },
+        async (error, result) => {
+          if (error) {
+            return res.status(500).json({ error: 'Image upload failed' });
+          }
+          try {
+            imageUrl = result.secure_url;
+            const dbResult = await pool.query(
+              'UPDATE banners SET title = $1, highlight = $2, subtitle = $3, link = $4, image_url = $5 WHERE id = $6 RETURNING *',
+              [title, highlight, subtitle, link, imageUrl, id]
+            );
+            res.json(dbResult.rows[0]);
+          } catch (err) {
+            res.status(500).json({ error: err.message });
+          }
+        }
+      ).end(req.file.buffer);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  } else {
+    try {
+      const result = await pool.query(
+        'UPDATE banners SET title = $1, highlight = $2, subtitle = $3, link = $4, image_url = $5 WHERE id = $6 RETURNING *',
+        [title, highlight, subtitle, link, imageUrl, id]
+      );
+      res.json(result.rows[0]);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
   }
 });
 
