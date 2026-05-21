@@ -10,19 +10,34 @@ const Footer = () => {
           <img src="/img/logo.png" alt="Teklearn Logo" className="footer-logo-img" />
           <p>Real projects. Real skills. Real outcomes. Learn from industry professionals.</p>
           <div className="social-links">
-            <a href="#" aria-label="Email"><Mail size={20} /></a>
-            <a href="#" aria-label="Phone"><Phone size={20} /></a>
-            <a href="#" aria-label="Location"><MapPin size={20} /></a>
+            <a href="mailto:teklearn1@gmail.com" aria-label="Email"><Mail size={20} /></a>
+            <a href="tel:+917306134850" aria-label="Phone"><Phone size={20} /></a>
+            <a href="https://share.google/9IWLLlJkAt5tiM6fv" target="_blank" rel="noopener noreferrer" aria-label="Location"><MapPin size={20} /></a>
           </div>
         </div>
         
         <div className="footer-links">
-
           <div className="link-group">
             <h4>Company</h4>
             <Link to="/about">About Us</Link>
             <Link to="/services">Careers</Link>
             <Link to="/contact">Contact</Link>
+          </div>
+          
+          <div className="link-group">
+            <h4>Contact</h4>
+            <a href="tel:+917306134850" className="contact-link">
+              <Phone size={16} />
+              <span>+91 73061 34850</span>
+            </a>
+            <a href="mailto:teklearn1@gmail.com" className="contact-link">
+              <Mail size={16} />
+              <span>teklearn1@gmail.com</span>
+            </a>
+            <a href="https://share.google/9IWLLlJkAt5tiM6fv" target="_blank" rel="noopener noreferrer" className="contact-link">
+              <MapPin size={16} />
+              <span>Our Location</span>
+            </a>
           </div>
         </div>
       </div>

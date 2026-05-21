@@ -72,18 +72,27 @@
 }
 
 .link-group a {
-  display: block;
+  display: flex;
   color: var(--text-secondary);
   margin-bottom: 0.8rem;
   font-size: 0.9rem;
   transition: color 0.3s ease;
   min-height: 36px;
-  display: flex;
   align-items: center;
 }
 
 .link-group a:hover {
   color: var(--accent-color);
+}
+
+.contact-link {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.contact-link span {
+  word-break: break-word;
 }
 
 .footer-bottom {

@@ -42,6 +42,15 @@ const Home = () => {
     return () => clearInterval(wordInterval);
   }, []);
 
+  // Auto-rotate banner every 5 seconds
+  useEffect(() => {
+    if (banners.length === 0) return;
+    const bannerInterval = setInterval(() => {
+      setBannerIndex((prev) => (prev + 1) % banners.length);
+    }, 5000);
+    return () => clearInterval(bannerInterval);
+  }, [banners]);
+
 
 
   useEffect(() => {
@@ -53,10 +62,14 @@ const Home = () => {
   useEffect(() => {
     const topCoursesLength = courses.length;
     if (topCoursesLength === 0) return;
-    const interval = setInterval(() => {
-      setActiveCourse((prev) => (prev + 1) % topCoursesLength);
-    }, 3000);
-    return () => clearInterval(interval);
+    
+    // Only auto-rotate on desktop (width > 768px)
+    if (typeof window !== 'undefined' && window.innerWidth > 768) {
+      const interval = setInterval(() => {
+        setActiveCourse((prev) => (prev + 1) % topCoursesLength);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
   }, [courses]);
 
 
@@ -360,7 +373,7 @@ const Home = () => {
         <div className="cta-card">
           <h2>Start Building Your Career Today</h2>
           {/* Flex container for bottom CTAs */}
-          <div className="cta-buttons mt-4">
+          <div className="cta-buttons">
             {/* Final registration button */}
             <Link to="/contact" className="btn btn-outline-light" style={{ padding: '1rem 2.5rem', borderRadius: '30px' }}>Join Now</Link>
             {/* Consultation booking button */}
